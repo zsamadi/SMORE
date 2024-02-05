@@ -1,0 +1,2 @@
+# SMORE
+Spatial Motif Recognition
