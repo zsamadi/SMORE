@@ -5,4 +5,3 @@ Spatial Motif Recognition
 
 main files for running the experiments on bipolar interneuron dataset, hypothalamus preoptic region and 3D hypothalamus preoptic region dataset. 
 
-
