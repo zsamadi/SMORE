@@ -1,4 +1,8 @@
 # SMORE
 Spatial Motif Recognition
 
-main files for running the experiments are in expr folder. 
+[expr]([https://github.com/zsamadi/SMORE/tree/main/expr])
+
+main files for running the experiments on bipolar interneuron dataset, hypothalamus preoptic region and 3D hypothalamus preoptic region dataset. 
+
+
