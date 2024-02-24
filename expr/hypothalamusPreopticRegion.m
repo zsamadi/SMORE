@@ -381,43 +381,9 @@ neighNodesC=[];
                 saveas(gcf,figname)
 
 
-                % for sectioni=cSectionsU
-                %     sectionFlagi=(cSections==sectioni);
-                %     cPTypesi=cPTypes(sectionFlagi);
-                %     PWMT=sum(cPTypesi.'==cPTypesU);
-                %     PWMT=PWMT/sum(PWMT);
-                %
-                %     figure
-                %     bar(cPTypesU, PWMT)
-                %     grid on
-                %     xlabel('cell type')
-                %     ylabel('frequency')
-                %     text(cPTypesU-0.5, PWMT+0.001, cellTypesOne)
-                %     title(sprintf('animal ID %d, Bregma ID',sectioni) )
-                % end
-
-
-
-
-
-
-
-
-
-                % figname='output\cellTypesFreqs.fig';
-                %     % print(gcf,figname(1:end-4), '-djpeg', '-r600'); %<-Save as jpg with 600 DPI
-                % print(gcf,figname(1:end-4), '-djpeg'); %<-Save as jpg
-                %
-                % saveas(gcf,figname)
-
-                % cPTypes=cPTypes(randperm(length(cPTypes)));
                 alphabet=cellTypesOne;
                 numCells=length(alphabet);
 
-
-                % highlighTypes(G, cPTypes, 'Primary')
-                % highlighTypes(G, cNTypesCluster, 'Cluster Shuffled')
-                % highlighTypes(G, cNTypesKernel, 'Kernel Shuffled')
 
                 PWMT(PWMT==0)=0.0001;
                 PWMTNK(PWMTNK==0)=0.0001;
@@ -513,20 +479,6 @@ neighNodesC=[];
 
 
 
-                % numDStream=size(posSeq, 1);
-
-
-                % Write Fasta file to be analyzed by official STREME
-                % numDStreamFasta=numDStream;
-                % posFasta=char(posSeq+64);
-                % negFasta=char(negSeq+64);
-
-                % numDStreamFasta=5;
-                %     rng('default');
-
-
-                % alphabet=char(alphabetNumeric+64);
-                % numHNodes=sum(gStruct.labels(:, 2)==1);
 
 
 
@@ -548,10 +500,7 @@ neighNodesC=[];
 
                 elapsedTime=toc(timerValue);
 
-                %
-                % [extMotif,textOut, commandText, background, extMotifEval]=grStreme(cPTypes=cPTypes, cNTypes=cNTypes,cPHTypes=cHTypes,cNHTypes=cNHTypes,pSeq=posSeq,nSeq=negSeq,pHSeq=pHoldSeq, nHSeq=nHoldSeq, ...
-                %     rvp=gOptions.rvp, mkvOrder=gOptions.mkvOrder, wMin=W, wMax=W,threshold=0.005, nmotifs=numExtMotifs,alphabet=alphabet, isEraseNodes=isEraseNodes);
-
+    
 
                 %%  resolve motif nodes
 
