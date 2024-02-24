@@ -439,21 +439,6 @@ neighNodesC=[];
                 % [pathList, lengthList, nodeSections]=enumerateUSRKPathsTest(gStruct, pathLength, [ones(1,pathLength-1), samPro]);
 
 
-                % delete(gcp('nocreate'))
-
-                %% Generate Shuffled data with k-mers presereved
-
-                % nodListAll=vertcat(pathList{:});
-                % 
-                % nodListAll=cPTypes(nodListAll(:));
-                % 
-                % nodListAll=ismember(nodListAll, fixedTypes);
-                % nodListAll=reshape(nodListAll, [], W);
-                % nodListAll=all(nodListAll, 2);
-                % 
-                % pathList=pathList(~nodListAll);
-                % nodeSections=nodeSections(~nodListAll);
-                % pathWeights=pathWeights(~nodListAll);
 
 
 
@@ -462,7 +447,6 @@ neighNodesC=[];
                 gOptions.mkvOrder=0;
                 gOptions.rvp=true;
                 % gOptions.isChar=false;
-                % gOptions.cntFold=0; % used to generate larger number of control sequences, 2 fold, 3 fold, silly :)
 
                 gOptions.isSectHold=true;
                 gOptions.isHExclsv=true;
@@ -526,10 +510,6 @@ neighNodesC=[];
 
 
 
-                % parpool;
-
-
-                % alphabetNumeric=alphabet;
 
 
 
@@ -555,7 +535,7 @@ neighNodesC=[];
 
 
                 indSeedMode=false;
-                diffMotif=false;
+                diffMotif=true;
                 isUBack=false;
 
                 [extMotif,textOut, commandText, background, extMotifEval]=mtStreme(cPTypes=cPTypes0, cNTypes=cNTypes0,cPHTypes=cPTypes,cNHTypes=cNTypes(1:length(cPTypes)),pSeq=posSeq, ...
