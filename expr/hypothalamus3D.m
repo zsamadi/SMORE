@@ -95,20 +95,14 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
             fixedTypes=(0:numFixedTypes);
             fixedTypes=fixedTypes(:);
 
-            % shuffleMode='shuffle'; %can be 'oShuffle', 'cluster', 'kernel', 'noise'
 
             %% Creat Graph
 
-            % cNodes=(1:1000).';
-            % ucNodes=(1:100).';
-            %
-            % unqMersFlags=getZNICIL(cNodes,  ones(W, 1),ucNodes);
 
 
 
             plotGraph=true;
 
-            % gathers all sub cell types into the main cell type
             cgOptions.bregID=bregID;
 
             cgOptions.ambigRatio=ambigRatio;
@@ -271,44 +265,6 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
             %% Type Shuffling
 
 
-
-            % nodesAllNotFixed0=nodesAllNotFixed;
-            %
-            % randIndex=-1;
-            %
-            % while ~isempty(nodesAllNotFixed0)
-            %
-            %
-            %
-            %     iGN=nodesAllNotFixed0(1);
-            %     neighsIGN=gStructSh.neighs{iGN};
-            %     neighsIGNE=[iGN;neighsIGN];
-            %     cPTypesi=cPTypes(neighsIGNE);
-            %
-            %     notFixedNeighsFlag=ismember(cPTypesi, fixedTypes);
-            %
-            %     cPTypesi(notFixedNeighsFlag)=[];
-            %     neighsIGNE(notFixedNeighsFlag)=[];
-            %
-            %
-            %     randIndex=randi(length(cPTypesi));
-            %
-            %     cNTypesKernel(iGN)=cPTypesi(randIndex);
-            %     % cNTypesKernel(neighsIGNE(randIndex))=cPTypes(iGN);
-            %     nodesAllNotFixed0(1)=[];
-            %
-            %     % if ~isempty(nodesAllNotFixed0)
-            %     %     nodesAllNotFixed0(nodesAllNotFixed0==neighsIGNE(randIndex))=[];
-            %     % end
-            %
-            %
-            %
-            % end
-
-
-
-
-
             cPTypesU=(1:length(cellTypesOne));
 
 
@@ -342,43 +298,9 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
             saveas(gcf,figname)
 
 
-            % for sectioni=cSectionsU
-            %     sectionFlagi=(cSections==sectioni);
-            %     cPTypesi=cPTypes(sectionFlagi);
-            %     PWMT=sum(cPTypesi.'==cPTypesU);
-            %     PWMT=PWMT/sum(PWMT);
-            %
-            %     figure
-            %     bar(cPTypesU, PWMT)
-            %     grid on
-            %     xlabel('cell type')
-            %     ylabel('frequency')
-            %     text(cPTypesU-0.5, PWMT+0.001, cellTypesOne)
-            %     title(sprintf('animal ID %d, Bregma ID',sectioni) )
-            % end
-
-
-
-
-
-
-
-
-
-            % figname='output\cellTypesFreqs.fig';
-            %     % print(gcf,figname(1:end-4), '-djpeg', '-r600'); %<-Save as jpg with 600 DPI
-            % print(gcf,figname(1:end-4), '-djpeg'); %<-Save as jpg
-            %
-            % saveas(gcf,figname)
-
-            % cPTypes=cPTypes(randperm(length(cPTypes)));
             alphabet=cellTypesOne;
             numCells=length(alphabet);
 
-
-            % highlighTypes(G, cPTypes, 'Primary')
-            % highlighTypes(G, cNTypesCluster, 'Cluster Shuffled')
-            % highlighTypes(G, cNTypesKernel, 'Kernel Shuffled')
 
             PWMT(PWMT==0)=0.0001;
             PWMTNK(PWMTNK==0)=0.0001;
@@ -395,8 +317,6 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
             saveas(gcf,figname)
 
             %% Sample Paths from the Graph, Rand_ESU, or Random Walk
-
-            %Ordinary Random Walk
 
 
 
@@ -417,7 +337,6 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
             gOptions.hFrac=0;
             gOptions.mkvOrder=0;
             gOptions.rvp=true;
-            % gOptions.cntFold=0; % used to generate larger number of control sequences, 2 fold, 3 fold, silly :)
 
             gOptions.isSectHold=true;
             gOptions.isHExclsv=true;
@@ -431,7 +350,6 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
 
             numHLD=ceil(length(nodeSectionsGenu)/4);
 
-            % randiHold=nodeSectionsGenu(randperm(length(nodeSectionsGenu)));
             randiHold=nodeSectionsGenu((1:length(nodeSectionsGenu)));
 
             randiHold=randiHold(1:numHLD);
@@ -450,8 +368,6 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
                 nodeSectionsGenR=nodeSectionsR;
                 nodeSectionsGenRu=unique(nodeSectionsGenR);
 
-                % randiHoldR=randperm(length(nodeSectionsGenRu));
-                % randiHoldR=randiHoldR(1:floor(length(nodeSectionsGenRu)/4));
                 randiHoldR=randiHold;
                 nodeSectionsGenR(ismember(nodeSectionsGenR,randiHoldR))=1;
 
@@ -471,39 +387,8 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
             delete(gcp('nocreate'))
 
 
-            % gOptions.isControl=true;
-            %
-            % [negSeq, nHoldSeq]=generateSeqs(pWordList,nodeSectionsGen,gOptions);
-
-            %% Identify Motifs
 
 
-
-            % parpool;
-
-
-            % alphabetNumeric=alphabet;
-
-
-
-            % numDStream=size(posSeq, 1);
-
-
-            % Write Fasta file to be analyzed by official STREME
-            % numDStreamFasta=numDStream;
-            % posFasta=char(posSeq+64);
-            % negFasta=char(negSeq+64);
-
-            % numDStreamFasta=5;
-            %     rng('default');
-
-
-            % alphabet=char(alphabetNumeric+64);
-            % numHNodes=sum(gStruct.labels(:, 2)==1);
-
-
-
-            % cNTypes=cPTypes(randperm(length(cPTypes)));
             diffMotif=false;
             indSeedMode=false;
             isUBack=false;
@@ -514,7 +399,7 @@ for shuffleMode=["kernelPath","shuffle"] % ["shuffle", "kernel", "kernelPath"]
 
             [extMotif,textOut, commandText, background, cPTypesOut]=mtStreme(cPTypes=cPTypes0, cNTypes=cNTypes0,cPHTypes=cPTypes,cNHTypes=cNTypes(1:length(cPTypes)),pSeq=posSeq,nSeq=negSeq,pHSeq=pHoldSeq, nHSeq=nHoldSeq, ...
                 rvp=gOptions.rvp, mkvOrder=gOptions.mkvOrder, wMin=W, wMax=W,threshold=0.005, nmotifs=numExtMotifs,alphabet=alphabet, fixedTypes=fixedTypes,nearNeighs=shConfig.nearNeighs,...
-                shuffleMode=shuffleModeGMaps, isUBack=isUBack, trNumShuffle=trNumShuffle, diffMotif=diffMotif, indSeedMode=indSeedMode, scIterMax=2);
+                shuffleMode=shuffleModeGMaps, isUBack=isUBack, trNumShuffle=trNumShuffle, diffMotif=diffMotif, indSeedMode=indSeedMode);
 
             elapsedTime=toc(timerValue);
 
