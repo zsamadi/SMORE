@@ -1,41 +1,15 @@
 
 function seedsRefined=refineInitialSeeds(seedsNEVAL,seedsWmax,seqData, seqDataSpecs, options)
 
-% from initial NEVAL motifs, chooses NREF motifs by counting all matches
-% and approximate matches in primary and control data to the motifs and computing their pvalue
-% input arguments:
-%   - seedsInfo
-%       - seedsInfo.seeds   : sorted seeds by pvalue
-%       - seedsInfo.pvalues : sorted pvalues
-%   - XnMerZoops: Cell containing zoops WMers of primary and control
-%   - seqData:
-%       - seqData.pSeq  : primary sequence
-%       - seqData.nSeq  : control sequence
-%       - seqData.pHSeq : primary holdoput sequence
-%       - seqData.nHSeq : control holdoput sequence
-%       - seqData.PWM0  : backgroung model
-%       - seqData.lens  : data lengths [size(posSeq90, 1),size(negSeq90, 1),size(pHoldSeq, 1),size(nHoldSeq, 1)];
-%   - options
-%       - options.NEVAL     : Number of motifs for initial evaluation
-%       - options.NREF      : Number of motifs for refinement
-%       - options.prior     : Dirichlet prior for initial evaluation
-%       - options.REFPrior  : Dirichlet prior for refinement step
-%  Output arguments:
-%   - seedsRefined: struct for sorted input WMers
-%      - seedsRefined.seeds: sorted NEVAL seeds, NREF of which to be further refined
-%      - seedsRefined.pvalues: significance obtained by fisher exact test
+
 
 prior=options.prior;
 wMax=options.wMax;
 NEVAL=options.NEVAL;
-
-
 motifsAll=seedsNEVAL.seeds;
 wSeedsAll=seedsNEVAL.wSeeds;
 pvaluesAll=seedsNEVAL.pvalues;
 maxWidthAll=seedsNEVAL.maxWidth;
-
-
 
 wSeedsU=unique(wSeedsAll);
 numW=length(wSeedsU);
@@ -45,12 +19,10 @@ wSeedsFlag=(wSeedsAll==wSeedsU.');
 validEx=~any(motifsAll==options.numCells+1, 2);
 
 motifsAllValid=motifsAll(validEx, :);
-% motifsAllNotValid=motifsAll(~validEx, :);
 
 pvaluesAllValid=pvaluesAll(validEx);
 wSeedsAllValid=wSeedsAll(validEx);
 maxWidthAllValid=maxWidthAll(validEx);
-% wSeedsAllNotValid=wSeedsAll(~validEx);
 
 
 wSeedsFlag=wSeedsFlag(validEx, :);
@@ -101,19 +73,9 @@ maxWidthNEVAL=maxWidthNEVAL(1:NEVALSeeds);
 
 
 [~, pidx]=sort(pvaluesNEVAL, 'ascend');
-% pvaluesNEVAL=pvalmaxWidthNEVAL(:, 1);
 motifsNEVAL=motifsNEVAL(pidx, :);
 wSeedsNEVAL=wSeedsNEVAL(pidx);
 maxWidthNEVAL=maxWidthNEVAL(pidx);
-
-
-% motifsNotNEVAL=cell2mat(motifsNotNEVAL);
-% motifsAll=[motifsNEVAL;motifsNotNEVAL;motifsAllNotValid];
-
-% wSeedsNotNEVAL=cell2mat(wSeedsNotNEVAL);
-% wSeedsAll=[wSeedsNEVAL;wSeedsNotNEVAL;wSeedsAllNotValid];
-
-
 
 
 
@@ -131,46 +93,26 @@ options.isOnlyPScore=true;
 
 for imt=1:NEVALSeeds
 
-%     wSeed=wSeedsNEVAL(imt);
 
     motifSeq=motifsNEVAL(imt, :);
-%         if all(motifSeq==[3, 5, 9, 10])
-%             check=1;
-%         end
-
-
-    % initialize PWM1 with motif
 
     PWM1=(motifSeq(:)==(1:length(PWM0)))/(1+prior)+priorBg.';
     PWM1L=log2(PWM1.');
-%     PWMS(:,1:wSeed)=(PWM1L(1:wSeed, :)-PWM0L).';
     if options.mkvOrder>0
         PWMS=PWM1L;
     else
         PWMS=(PWM1L-PWM0L);
     end
     options.seedNumber=[imt,NEVALSeeds];
-
-     printString=sprintf('(%d,%d)', imt, NEVALSeeds);
-
-     fprintf(printString);
-
-
-
+    printString=sprintf('(%d,%d)', imt, NEVALSeeds);
+    fprintf(printString);
 
     seedEnriched=nestedSeedEnrichment(PWMS, seedsWmax,seqData, seqDataSpecs, options);
     pvaluesLogEnrchd(imt)=seedEnriched.pvalue;
-
     delString=repelem(sprintf('\b'), 1, length(printString));
-
     fprintf(delString)
 
-
-
 end
-
-
-
 
 [pvalueNREFSort, sindex]=sort([pvaluesLogEnrchd, -wSeedsNEVAL],1);
 pvalueNREFSort=pvalueNREFSort(:,1);

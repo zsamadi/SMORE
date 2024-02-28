@@ -6,12 +6,6 @@ if length(findall(0))>1
     delete(findall(0));
 end
 
-
-% v03: cretaed to match with hypo_v01, fig5_NRet
-% v02: created for noise edition of control data generation
-% the output results very much depend on the holdout and training dada, so
-% be careful with that
-
 cd(fileparts(which(mfilename)));
 cd('..\')
 
@@ -29,34 +23,18 @@ end
 
 trNumShuffleo=1;
 
-
-
-
-% delete(gcp('nocreate'))
-% parpool;
 rng(1650);
 %% Hyperparameters
 gTrainNum=50;
 W=4;
-% Hyperparameters for Creating Graph
-RBPDiscard=false;           % Discard RBP Cells from downward analysis.
-
-% Hyperparameters for Random Walk
 numExtMotifs=20;
 isEraseNodes=true;
 fixedTypes=0;
-% fixedTypes=[(0:96),(111:116)];
 
 fixedTypes=fixedTypes(:);
 
 
 %% Creat Graph
-
-% cNodes=(1:1000).';
-% ucNodes=(1:100).';
-%
-% unqMersFlags=getZNICIL(cNodes,  ones(W, 1),ucNodes);
-
 
 
 folderName='D:\nucla\P1\matIO\data\';
@@ -103,41 +81,6 @@ end
 
 
 
-
-
-% outputFolderName=strcat(outputFolderName,'ID',num2str(cgOptions.ORetIDs));
-%
-% if cgOptions.isFemale && cgOptions.isMale
-%     outputFolderName=strcat(outputFolderName, 'AseFM');
-% elseif cgOptions.isFemale
-%     outputFolderName=strcat(outputFolderName, 'AseF');
-% else
-%     outputFolderName=strcat(outputFolderName, 'AseM');
-% end
-%
-%
-% if cgOptions.isNBreg && cgOptions.isPBreg
-%     outputFolderName=strcat(outputFolderName, 'BrgPN');
-% elseif cgOptions.isNBreg
-%     outputFolderName=strcat(outputFolderName, 'BrgN');
-% else
-%     outputFolderName=strcat(outputFolderName, 'BrgP');
-% end
-%
-% if cgOptions.isNaive && cgOptions.isStimu
-%     outputFolderName=strcat(outputFolderName, 'BhvNS');
-% elseif cgOptions.isNaive
-%     outputFolderName=strcat(outputFolderName, 'BhvN');
-% else
-%     outputFolderName=strcat(outputFolderName, 'BhvS');
-% end
-%
-% outputFolderName=strcat(outputFolderName, cgOptions.gMode);
-% outputFolderName=strcat(outputFolderName, shuffleMode);
-
-
-
-
 if cgOptions.isRandom
     fignamExtnd='Random.jpeg';
     filenamExtnd='Random.mat';
@@ -159,11 +102,6 @@ else
     yGHLim=3500;
 end
 
-% rmeConfig.fixedTypes=fixedTypes;
-% rmeConfig.gMode=cgOptions.gMode;
-% rmeConfig.shuffleMode=shuffleMode;
-
-% done=writeReadmebipolar(outputFolderName,  rmeConfig);
 
 cgOptions.rEpsilon=300;
 cgOptions.xyNoiseStd=0;
@@ -184,7 +122,7 @@ gHLoptions.ctAnnot=cellTypesOne;
 
 kNeighs=5;
 
-for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster', 'kernel', 'noisy'
+for shuffleMode="shuffle"%["shuffle", "kernelPath"] 
     for fixedTypes=[0, 15]
 
          close all
@@ -243,27 +181,7 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
         shConfig.fixedNodes=[];
         shConfig.shuffleMode=shuffleMode;
 
-        if strcmpi(shuffleMode, 'noise')
-            cgOptions.xyNoiseStd=3*edgeDistStd;
-            [GR,gStructR]=creatGraph(folderName,cgOptions);
 
-            cNTypes=(GR.Nodes.label(:, 1)).';
-            cSectionsR=(GR.Nodes.label(:, 2)).';
-            cSectionsUR=unique(cSectionsR);
-            xyCoordinatesR=GR.Nodes.Coordinates;
-            %
-            %  notSampleVertex=(1:length(cPTypes));
-            %
-            % notSampleVertex= notSampleVertex(cPTypes==15);
-            notSampleVertex=[];
-            [nodeListR, lengthListR, nodeSectionsR]=enumerateUSRKPathsTest(gStructR, pathLength, [ones(1,pathLength-1), samPro], notSampleVertex);
-            if isPlotGraph
-                gHLoptions.folderName=outputFolderName;
-                gHLoptions.isShuffled=true;
-                plotHLightGraph(GR, cNTypes, gHLoptions);
-            end
-
-        else
             shConfig.rEpsilon=cgOptions.rEpsilon;
             shConfig.fixedTypes=fixedTypes;
             shConfig.isSectShuffle=true;
@@ -286,8 +204,6 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
                 gHLoptions.isShuffled=true;
                 plotHLightGraph(G, cNTypes(1:length(cPTypes)), gHLoptions);
             end
-
-        end
 
 
 
@@ -327,43 +243,9 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
         saveas(gcf,figname)
 
 
-        % for sectioni=cSectionsU
-        %     sectionFlagi=(cSections==sectioni);
-        %     cPTypesi=cPTypes(sectionFlagi);
-        %     PWMT=sum(cPTypesi.'==cPTypesU);
-        %     PWMT=PWMT/sum(PWMT);
-        %
-        %     figure
-        %     bar(cPTypesU, PWMT)
-        %     grid on
-        %     xlabel('cell type')
-        %     ylabel('frequency')
-        %     text(cPTypesU-0.5, PWMT+0.001, cellTypesOne)
-        %     title(sprintf('animal ID %d, Bregma ID',sectioni) )
-        % end
-
-
-
-
-
-
-
-
-
-        % figname='output\cellTypesFreqs.fig';
-        %     % print(gcf,figname(1:end-4), '-djpeg', '-r600'); %<-Save as jpg with 600 DPI
-        % print(gcf,figname(1:end-4), '-djpeg'); %<-Save as jpg
-        %
-        % saveas(gcf,figname)
-
-        % cPTypes=cPTypes(randperm(length(cPTypes)));
         alphabet=cellTypesOne;
         numCells=length(alphabet);
 
-
-        % highlighTypes(G, cPTypes, 'Primary')
-        % highlighTypes(G, cNTypesCluster, 'Cluster Shuffled')
-        % highlighTypes(G, cNTypesKernel, 'Kernel Shuffled')
 
         PWMT(PWMT==0)=0.0001;
         PWMTNK(PWMTNK==0)=0.0001;
@@ -388,8 +270,7 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
         samPro=1;
 
         if samPro~=samPro0
-            % notSampleVertex=(1:length(cPTypes));
-            % notSampleVertex= notSampleVertex(cPTypes==15);
+
             notSampleVertex=[];
             enOptions.pdv=[ones(1,pathLength-1), samPro];
             enOptions.k=pathLength;
@@ -406,14 +287,11 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
         gOptions.hFrac=0;
         gOptions.mkvOrder=0;
         gOptions.rvp=true;
-        % gOptions.isChar=false;
-        % gOptions.cntFold=0; % used to generate larger number of control sequences, 2 fold, 3 fold, silly :)
+
 
         gOptions.isSectHold=true;
 
         gOptions.isHExclsv=true;
-
-        % nodeSectionsN=nodeSections;
 
 
         gOptions.numNodes=length(cPTypes);
@@ -430,7 +308,7 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
 
 
         [posSeq, pHoldSeq, cPTypes0, posWeight, pHoldWeight]=generateSeqs(pathList,pathWeights,nodeSectionsGen,cPTypes, gOptions);
-        % pHoldSeq=posSeq;
+  
         shuffleModeGMaps=shuffleMode;
 
 
@@ -439,8 +317,6 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
             nodeSectionsGenR=nodeSectionsR;
             nodeSectionsGenRu=unique(nodeSectionsGenR);
 
-            % randiHoldR=randperm(length(nodeSectionsGenRu));
-            % randiHoldR=randiHoldR(1:floor(length(nodeSectionsGenRu)/4));
             randiHoldR=randiHold;
             nodeSectionsGenR(ismember(nodeSectionsGenR,randiHoldR))=1;
 
@@ -450,52 +326,14 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
             gOptions.numGRs=trNumShuffle;
             [~, ~, cNTypes0, negWeight]=generateSeqs(pathList,pathWeights,nodeSectionsGen,cNTypes, gOptions);
 
-            % if kNeighs==kNeighsMax
-            %     [negSeq, ~, cNTypes0]=generateSeqs(nodeList,nodeSectionsGen,cNTypes, gOptions);
-            % end
-
-            % nHoldSeq=pHoldSeq;
-
         end
 
         delete(gcp('nocreate'))
 
 
-
-
-        % gOptions.isControl=true;
-        %
-        % [negSeq, nHoldSeq]=generateSeqs(pWordList,nodeSectionsGen,gOptions);
-
         %% Identify Motifs
 
 
-
-        % parpool;
-
-
-        % alphabetNumeric=alphabet;
-
-
-
-        % numDStream=size(posSeq, 1);
-
-
-        % Write Fasta file to be analyzed by official STREME
-        % numDStreamFasta=numDStream;
-        % posFasta=char(posSeq+64);
-        % negFasta=char(negSeq+64);
-
-        % numDStreamFasta=5;
-        %     rng('default');
-
-
-        % alphabet=char(alphabetNumeric+64);
-        % numHNodes=sum(gStruct.labels(:, 2)==1);
-
-
-
-        % cNTypes=cPTypes(randperm(length(cPTypes)));
         indSeedMode=false;
         diffMotif=false;
         isUBack=false;
@@ -564,12 +402,6 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
 
 
             extMotif{iEx}=outMotif;
-
-            % seqData.cPTypes(sitesErased.pNodes(:))=0;
-            % seqData.cNTypes(sitesErased.nNodes(:))=0;
-            % seqData.cPHTypes(sitesErased.pHNodes(:))=0;
-            % seqData.cNHTypes(sitesErased.nHNodes(:))=0;
-
 
 
         end
@@ -646,9 +478,6 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
 
 
         %
-        % figure
-        % plot(sort(scoreThrVec))
-        % grid on
 
         rmeConfig=cgOptions;
 
@@ -677,10 +506,6 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
 
         xcoordsTotal=G.Nodes.Coordinates(:, 1);
         ycoordsTotal=G.Nodes.Coordinates(:, 2);
-        %
-        % figure
-        % h=plot(G,'XData',xcoordsTotal,'YData',ycoordsTotal);
-
 
 
         intersectThr=0.25;
@@ -730,8 +555,6 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
 
         numNodesVec=zeros(numExtMotifs,1);
 
-        % intersect between all motif pairs
-        % all_marks = {'o','+','*','.','x','s','d','^','v','>','<','p','h'};
 
 
         saveFileName=strcat(outputFolderName,'matData', filenamExtnd);
@@ -739,23 +562,6 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
 
 
         %% Highlight Intersections
-        % green	[0 1 0]
-        % magenta	[1 0 1]
-        % yellow	[1 1 0]
-
-        % red		[1 0 0]
-
-        % black	[0 0 0]
-        % cyan	[0 1 1]
-        % white	[1 1 1]
-
-
-        % if cgOptions.isRandom
-        %     figure
-        % else
-        %     figure('WindowState' ,'maximize')
-        % end
-
 
 
         for iMG=1:numExtMotifs
@@ -827,8 +633,6 @@ for shuffleMode="shuffle"%["shuffle", "kernelPath"] %can be 'shuffle', 'cluster'
 
 
             figname=strcat(outputFolderName,'motifGroupOnGraph', num2str(iMG),num2str(W), fignamExtnd);
-            % print(gcf,figname(1:end-4), '-djpeg', '-r600'); %<-Save as jpg with 600 DPI
-            % print(gcf,figname(1:end-4), '-djpeg'); %<-Save as jpg
 
             saveas(gcf,figname)
 
