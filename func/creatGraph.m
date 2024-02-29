@@ -1,5 +1,5 @@
 
-function [G,gStruct,  h]=creatGraph(folderName, options)
+function [G,gStruct,  cellTypes]=creatGraph(folderName, options)
 
 numFileSection=options.retinaAndSection;
 plotGraph=options.plotGraph;
@@ -51,8 +51,6 @@ if options.isRandom
     
             zcoords=[xcoords, ycoords];
     
-%             Dmat = pdist2(zcoords,zcoords, 'euclidean');
-
             if strcmpi(options.gMode,"delaunay")
     
     
@@ -73,8 +71,6 @@ if options.isRandom
                 edges2=edges2(:);
                 edges=[edges1, edges2];
             else
-                % numNeighs=options.numNeighs;
-                % [~, D] = knnsearch(zcoords,zcoords, 'K',numNeighs);
                 rEps=options.rFEps;
                 nearNeighs = rangesearch(zcoords,zcoords, rEps);
                 edges=cell(length(nearNeighs),1);
@@ -101,9 +97,6 @@ if options.isRandom
             edges=sort(edges, 2);
             [edgesUnique,~,~]=unique(edges, 'rows', 'stable');
     
-%             edge_dist_idx=(edgesUnique(:,2)-1)*length(Dmat)+edgesUnique(:,1);
-%             edge_dist=Dmat(edge_dist_idx);
-
             edge_dist02=zcoords(edgesUnique(:,2), :)-zcoords(edgesUnique(:,1), :);
             edge_dist02=edge_dist02.^2;
             edge_dist02=sum(edge_dist02,2);
@@ -142,49 +135,6 @@ if options.isRandom
     G.Nodes.label=[cellSubtypeVec, cellSectionVecTotal];
     G.Nodes.Coordinates=([xcoordsTotal, ycoordsTotal]);
 
-% 
-%             xcoords=rand(numNodesRand,1);
-%             xcoords=numNodesRand*(xcoords-mean(xcoords));
-%             ycoords=rand(numNodesRand,1);
-%             ycoords=numNodesRand*(ycoords-mean(ycoords));
-%             cellSubtypeVec=repmat((1:numCTypesRand).', numNodesRand/numCTypesRand,1);
-%          
-%             zcoords=[xcoords, ycoords];
-%     
-%             Dmat = pdist2(zcoords,zcoords, 'euclidean');
-%     
-%             % Delauney_Triangle = delaunay(xcoords,ycoords);
-%     
-%             Delauney_Triangle=delaunayTriangulation(zcoords);
-%             connectTriangle=Delauney_Triangle.ConnectivityList;
-%     
-%             edges=[connectTriangle(:,1:2); connectTriangle(:,2:3); connectTriangle(:,[1,3])];
-%             edges=sort(edges, 2);
-%             [edgesUnique,~,~]=unique(edges, 'rows', 'stable');
-%     
-%             edge_dist_idx=(edgesUnique(:,2)-1)*length(Dmat)+edgesUnique(:,1);
-%             % edge distances are extracted out from the computed distance matrix
-%             edge_dist=Dmat(edge_dist_idx);
-%             Weigths=exp(-edge_dist.^2/mean(edge_dist)^2);
-%     
-%             weightThreshold=1e-6;
-%     
-%             edgesUnique=edgesUnique(Weigths>weightThreshold, :);
-%             WeigthsValid=Weigths(Weigths>weightThreshold);
-% 
-%     if isUniformWeight
-%         Weigths=ones(size(WeigthsValid, 1),1);
-%     else
-%          Weigths=WeigthsValid;
-%     end
-%     
-%     
-%     G=graph(edgesUnique(:,1),edgesUnique(:,2), Weigths);
-%     
-%     G.Nodes.label=[cellSubtypeVec, ones(size(cellSubtypeVec))];
-%     G.Nodes.Coordinates=zcoords;
-%     xcoordsTotal=xcoords;
-%     ycoordsTotal=ycoords;
 
 else
 
@@ -194,18 +144,10 @@ else
     for ifile=1:numFileSection(1)
         csvName=strcat('Retina', num2str(ifile));
         filename=strcat(folderName,'\',csvName, '.csv');
-        % filename='..\data\Retina1.csv';
     
         T = readtable(filename);
         sectNumber=T.SectionNumber;
-    
-        % cellSubtypeVec=cellSubtypeVec(randperm(length(cellSubtypeVec)));
-    
-        % iterMax=100;
-        % s_cellSubtypeVec=zeros(numcells, iterMax);
-        % for ii =1:iterMax
-        %     s_cellSubtypeVec(:,ii)=cellSubtypeVec(randperm(numcells));
-        % end
+
 
         yshift=(ifile-1)*10000;
     
@@ -243,30 +185,18 @@ else
          
             cellSectionVec(:)=(ifile-1)*secIDX+sectNumberi;
     
-            %
-            %         xcoords=xcoords(1:5);
-            %         ycoords=ycoords(1:5);
-            %         cellSubtypeVec=cellSubtypeVec(1:5);
     
             xcoordsTotal=[xcoordsTotal;xcoords+xshift];
             ycoordsTotal=[ycoordsTotal;ycoords+yshift];
             cellSubtypeVecTotal=[cellSubtypeVecTotal;cellSubtypeVec];
             cellSectionVecTotal=[cellSectionVecTotal;cellSectionVec];
     
-            % xcoords=xcoords(cellSubtypeVec~=15);
-            % ycoords=ycoords(cellSubtypeVec~=15);
-            % cellSubtypeVec=cellSubtypeVec(cellSubtypeVec~=15);
-    
-            % %
-    
+
             numcells=length(cellSubtypeVec);
     
     
             zcoords=[xcoords, ycoords];
-    
-%             Dmat = pdist2(zcoords,zcoords, 'euclidean');
-    
-            % Delauney_Triangle = delaunay(xcoords,ycoords);
+
     
 
 
@@ -314,17 +244,10 @@ else
 
             end
     
-            % figure
-            % triplot(Delauney_Triangle)
-
     
             edges=sort(edges, 2);
             [edgesUnique,~,~]=unique(edges, 'rows', 'stable');
     
-%             edge_dist_idx=(edgesUnique(:,2)-1)*length(Dmat)+edgesUnique(:,1);
-            % edge distances are extracted out from the computed distance matrix
-%             edge_dist=Dmat(edge_dist_idx);
-%             Weigths=exp(-edge_dist.^2/mean(edge_dist)^2);
 
 
             edge_dist02=zcoords(edgesUnique(:,2), :)-zcoords(edgesUnique(:,1), :);
@@ -348,6 +271,7 @@ else
         end
     end
     cellSubtypeVec=cellSubtypeVecTotal;
+    cellTypes=unique(cellSubtypeVec);
     if isUniformWeight
         Weigths=ones(size(edgesUniqueTotal, 1),1);
     else
@@ -364,8 +288,6 @@ else
 end
 
 gStruct=getTransitionStruct(G);
-% gStruct.coordinates=G.Nodes.Coordinates;
-% gStruct.labels=G.Nodes.label;
 
 if plotGraph
     figure

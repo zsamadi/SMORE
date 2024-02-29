@@ -111,30 +111,11 @@ isAA = true;
 NTFlag = false;
 displayLogo = true;
 nSymbols = 68; % number of symbols in alphabet for NT, 68 for AA 
-fileName = []; % a default file name
 fileExt = 'png';     % Image file extension
 corrError = true;
 
 cTypeChars = ['ABCDEFGHIJKLMNOPQRSTUVWXYZybcdehfikljporstuvwxaznqmg', char((198:213))];
 
-% cTypeCharsN=cTypeChars;
-% seedLets=[1,2,3,4,5,6,7,8,11,14,16,18,20,21,22,23,25,26,27,31,32,34,36,37,38,40,42,43,47,49,57,58,59,60,63,64,68,71,73,77];
-% seedLets=[1,2,3,4,5,6,7,8,10,11,13,14,16,18,22,23,25,26,27,28,31,32,35,36,37,38,40,43,47,55,57,59,61,62,64,68,69,71,77];
-% seedLets=[1,2,3,4,5,6,7,8,9,10,11,13,14,15,16,18,20,21,22,23,25,26,27,28,31,32,33,34,36,37,38,39,40,41,42,43,46,47,49,57,58,59,60,61,62,64,68,69,71,72,77];
-% % seedLets=[1,2,3,4,5,6,7,8,10,11,14,15,16,17,18,20,21,22,23,24,25,26,27,28,29,30,31,32,33,35,37,38,39,40,43,44,45,47,51,54,56,57,59,60,62,63,64,65,66,68,69,71,72,73,76];
-% otherIndx=(1:length(cTypeChars));
-% 
-% cTypeCharsN(seedLets)=cTypeChars(1:length(seedLets));
-% otherIndx(seedLets)=[];
-% cTypeCharsN(otherIndx)=cTypeChars(length(seedLets)+1:end);
-% cTypeChars=cTypeCharsN;
-
-% cTypeChars = ['ABCDEFGHIJKLMNabcdefhijklmnorstuvwxyzpqgOPQRSTUVWXYZ', char((198:229))];
-
-% 
-[~, iSt]=sort(background{1}, 'descend');
-% 
-% cTypeChars(iSt)=cTypeChars;
 
 ntSymbols = 'ACGT';
 symbolList = char(ntSymbols(:));
