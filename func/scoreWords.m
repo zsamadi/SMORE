@@ -26,11 +26,11 @@ if any(wordsErs)
 else
     PWMScoreLetter=PWMScoreLT;
 end
+
 PWMScore=sum(PWMScoreLetter,2);
 
 PWMScore=gather(PWMScore);
 PWMScoreLetter=gather(PWMScoreLetter);
-
 
 if order>0
     scoreBack=getScoreBack(seeds,scrSpecs);
@@ -39,6 +39,10 @@ if order>0
     PWMScore=sum(PWMScoreLetter,2);
 
 end
+
+% PWMScoreLetter=round(PWMScoreLetter, 10);
+% PWMScore=round(PWMScore, 10);
+
 
 
 

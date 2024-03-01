@@ -1,91 +1,67 @@
 
-function [G,gStruct,  h, BIDAllU, AIDIdx, TOut, edgeDistStd]=creatAGraph(filename, options)
+function [G,gStruct, TOut, nodeTypeVecU]=creatAGraph(filename, options)
 
 T = readtable(filename);
 
-edgesUniqueTotal=[];
-numcellsTotal=0;
-xcoordsTotal=[];
-ycoordsTotal=[];
-cellSubtypeVecTotal=[];
-cellSectionVecTotal=[];
-AID=T.AID;
-BIDAll=T.BID;
+AID=T.NID;
+BIDAll=ones(size(AID));
 BIDAllU=unique(BIDAll);
 AIDIdx=(unique(AID)).';
 AIDIdx=AIDIdx(~isnan(AIDIdx));
 TCia=cell(length(AIDIdx), 1);
 edgeDistSum=[0,0];
-if options.xyNoiseStd>0
-    cellTAll=T.cellSubtype;
-    notFixedTypes=~ismember(cellTAll, options.fixedTypes);
-
-    if options.isNoiseCTS
-        cellTAll(notFixedTypes)=cellTAll(notFixedTypes)+rand(sum(notFixedTypes),1);
-        [~, iu, ju]=unique(cellTAll);
-        xyNoiseU=options.xyNoiseStd*(rand(length(iu), 2)-0.5);
-        xyNoise=xyNoiseU(ju, :);
-    else
-        xyNoise=zeros(size(T, 1), 2);
-        xyNoiseNF=rand(sum(notFixedTypes), 2);
-        xyNoiseNF=(xyNoiseNF-mean(xyNoiseNF))./std(xyNoiseNF);
-        xyNoiseNF=options.xyNoiseStd*xyNoiseNF;
-        xyNoise(notFixedTypes, :)=xyNoiseNF;
-    end
-else
-    xyNoise=zeros(size(T, 1), 2);
-end
 numNodes=0;
 
 nearNeighsia=cell(length(AIDIdx),1);
+
+
+edgesUniqueTotal=cell(length(AIDIdx),1);
+numcellsTotal=0;
+xcoordsTotal=cell(1000,1);
+ycoordsTotal=cell(1000,1);
+nodeTypeVecTotal=cell(1000,1);
+cellSectionVecTotal=cell(1000,1);
+
+
+iABID=0;
+xshift=0;
+yshift=0;
 
 for iAID=1:length(AIDIdx)
     AIDi=AIDIdx(iAID);
     loopFlafID=(AID==AIDi);
     T1=T(loopFlafID, :);
-    xyNoise1=xyNoise(loopFlafID, :);
 
-    BID=T1.BID;
+    % BID=T1.BID;
+    BID=ones(sum(loopFlafID), 1);
+
     BIDU=unique(BID);
-    if length(BIDU)<2
-        yshift=(iAID-1)*3000;
-    else
-        yshift=(AIDi-1)*3000;
-    end
+
     [~, BInAll]=ismember(BIDU, BIDAllU);
     TCib=cell(length(BIDU), 1);
     nearNeighsib=cell(length(BIDU), 1);
+    xshift=0;
 
-    for iBregma=1:length(BIDU)       
+    for iBID=1:length(BIDU)  
+        iABID=iABID+1;
 
-        xshift=(BIDU(iBregma))*1e5/2;
-        loopFlagBrg=(BID==BIDU(iBregma));
-        T2=T1(loopFlagBrg, :);
-        xyNoise2=xyNoise1(loopFlagBrg, :);
-        maxX=max(T2.Centroid_X);
-        minX=min(T2.Centroid_X);     
-        xcoords=T2.Centroid_X+xyNoise2(:, 1);
-        gFlag=xcoords>maxX;
-        lFlag=xcoords<minX;    
-        xcoords(gFlag|lFlag)=xcoords(gFlag|lFlag)-0.9*xyNoise2(gFlag|lFlag, 1);
+        loopFlagBID=(BID==BIDU(iBID));
+        T2=T1(loopFlagBID, :);
+        xcoords=T2.Centroid_X; 
         xcoords=xcoords-mean(xcoords);
-        maxY=max(T2.Centroid_Y);
-        minY=min(T2.Centroid_Y);
-        ycoords=T2.Centroid_Y+xyNoise2(:, 2);
-        gFlag=ycoords>maxY;
-        lFlag=ycoords<minY;
-        ycoords(gFlag|lFlag)=ycoords(gFlag|lFlag)-0.9*xyNoise2(gFlag|lFlag, 2);
+        ycoords=T2.Centroid_Y;
         ycoords=ycoords-mean(ycoords);
-        cellSubtypeVec=T2.cellSubtype;
+        nodeTypeVec=T2.nodeType;
 
-        cellSectionVec=ones(length(cellSubtypeVec),1);
+        cellSectionVec=ones(length(nodeTypeVec),1);
 
-        cellSectionVec(:)=(AIDi-1)*length(BIDAllU)+BInAll(iBregma);
-        xcoordsTotal=[xcoordsTotal;xcoords+xshift];
-        ycoordsTotal=[ycoordsTotal;ycoords+yshift];
-        cellSubtypeVecTotal=[cellSubtypeVecTotal;cellSubtypeVec];
-        cellSectionVecTotal=[cellSectionVecTotal;cellSectionVec];
-        numcells=length(cellSubtypeVec);
+        cellSectionVec(:)=(AIDi-1)*length(BIDAllU)+BInAll(iBID);
+        
+        xcoordsTotal{iABID}=xcoords+xshift;
+        ycoordsTotal{iABID}=ycoords+yshift;
+        nodeTypeVecTotal{iABID}=nodeTypeVec;
+        cellSectionVecTotal{iABID}=cellSectionVec;
+        numcells=length(nodeTypeVec);
         zcoords=[xcoords, ycoords];
         if strcmpi(options.gMode,"delaunay")
 
@@ -146,7 +122,7 @@ for iAID=1:length(AIDIdx)
            numNodesi=length(xcoords);
            numNodes=numNodes+numNodesi;
            
-           nearNeighsib{iBregma}=neighsi;
+           nearNeighsib{iBID}=neighsi;
 
         edges=sort(edges, 2);
         [edgesUnique,~,~]=unique(edges, 'rows', 'stable');
@@ -159,16 +135,26 @@ for iAID=1:length(AIDIdx)
         weightThreshold=1e-10;
         edgeDistSum=edgeDistSum+[sum(sqrt(edgeDist02(Weigths>weightThreshold))), sum(Weigths>weightThreshold)];
         edgesUnique=edgesUnique(Weigths>weightThreshold, :);
-        WeigthsValid=Weigths(Weigths>weightThreshold);
-        edgesUniqueTotal=[edgesUniqueTotal;edgesUnique+numcellsTotal];
+        edgesUniqueTotal{iABID}=edgesUnique+numcellsTotal;
         numcellsTotal=numcellsTotal+numcells;
-        TCib{iBregma}=T2;
+        TCib{iBID}=T2;
+        xshift=xshift+2.2*max(abs(xcoordsTotal{iABID}));
+
 
     end
+    yshift=yshift+2.2*max(abs(ycoordsTotal{iABID}));
 
     TCia{iAID} = vertcat(TCib{:});
     nearNeighsia{iAID}=vertcat(nearNeighsib{:});
 end
+
+
+xcoordsTotal=vertcat(xcoordsTotal{:});
+ycoordsTotal=vertcat(ycoordsTotal{:});
+nodeTypeVecTotal=vertcat(nodeTypeVecTotal{:});
+cellSectionVecTotal=vertcat(cellSectionVecTotal{:});
+
+edgesUniqueTotal=vertcat(edgesUniqueTotal{:});
 
 TOut=vertcat(TCia{:});
 
@@ -176,7 +162,7 @@ TOut.Centroid_X=xcoordsTotal;
 TOut.Centroid_Y=ycoordsTotal;
 
 
-cellSubtypeVec=cellSubtypeVecTotal;
+nodeTypeVec=nodeTypeVecTotal;
 Weigths=ones(size(edgesUniqueTotal, 1),1);
 
 
@@ -184,17 +170,15 @@ nearNeighs=vertcat(nearNeighsia{:});
 
 G=graph(edgesUniqueTotal(:,1),edgesUniqueTotal(:,2), Weigths);
 
-G.Nodes.label=[cellSubtypeVec, cellSectionVecTotal];
+G.Nodes.label=[nodeTypeVec, cellSectionVecTotal];
 G.Nodes.Coordinates=([xcoordsTotal, ycoordsTotal]);
 if ~isempty(nearNeighs)
     G.Nodes.nearNeighs=nearNeighs;
 end
 
-[cellSubtypeVecU, ~, jU]=unique(cellSubtypeVec);
+[nodeTypeVecU, ~, jU]=unique(nodeTypeVec);
 cellCnts=accumarray(jU, 1);
 [~, ist]=sort(cellCnts, 'descend');
-cellSubtypeVecU=cellSubtypeVecU(ist);
+nodeTypeVecU=nodeTypeVecU(ist);
 gStruct=getTransitionStruct(G);
-
-edgeDistStd=edgeDistSum(1)/edgeDistSum(2);
 

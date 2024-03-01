@@ -1,31 +1,41 @@
-function done = smore( dataFolder , options)
+function done = smore(dataFolder , options)
 
 arguments
-    dataFolder.input='data\';
+    dataFolder.input='sampleDataEb.csv';
     dataFolder.output='output\';
     options.fixedNodes=0;
-    options.alphabet='ABCDEFGHIJKLMNO';
+    options.alphabet=[];
     options.NEVAL=25;
     options.NREF=4;
     options.WMotif=4;
     options.nRefIter=20;
     options.threshold=0.005;
     options.patience=3;
-    options.nmotifs=20;
+    options.nmotifs=5;
     options.isErzHOut=true;
-    options.scIterMax=1;
+    options.scIterMax=10;
     options.gTrainNum=50;
     options.fixedTypes=0;
     options.diffMotif=false;
-    options.shuffleMode='shuffle';
+    options.shuffleMode='kernel';
     options.isEnrich=true;
-    options.upd=1;
+    options.samplingFreq=0.2;
+    options.gMode='delaunay';
+    options.numNeighs=5;
+    options.rEps=0;
+    options.neighDepth=4;
+    options.isOKSingleNC=false;
+
 end
-
-
 clc
-close all
-clearvars
+
+
+
+fprintf('smore started with shuffling method "%s" and numFixedTypes "%d" \n', options.shuffleMode, options.fixedTypes);
+
+if strcmpi(options.shuffleMode, 'kernel')
+    options.shuffleMode='kernelPath';
+end
 
 if length(findall(0))>1
     delete(findall(0));
@@ -39,12 +49,12 @@ addpath(genpath(pwd))
 isTestMode=false;
 isPlotGraph=true;
 
-c=clock;
-c=c(1:end-1);
-cStr=string(c(1));
-for ic=2:length(c)-1
-    cStr=strcat(cStr, '_', string(c(ic)));
-end
+% c=clock;
+% c=c(1:end-1);
+% cStr=string(c(1));
+% for ic=2:length(c)-1
+%     cStr=strcat(cStr, '_', string(c(ic)));
+% end
 
 trNumShuffleo=1;
 
@@ -88,14 +98,15 @@ cgOptions.isFemale=true;
 cgOptions.isMale=false;
 cgOptions.isNaive=true;
 cgOptions.isStimu=true;
+cgOptions.rEps=options.rEps;
 
 outputFolderName0=dataFolder.output;
 
 outputFolderName0=strcat(outputFolderName0,'W', num2str(W));
 
-if ~isTestMode
-    outputFolderName0=strcat(outputFolderName0,'_',cStr);
-end
+% if ~isTestMode
+%     outputFolderName0=strcat(outputFolderName0,'_',cStr);
+% end
 
 
 
@@ -113,8 +124,6 @@ cgOptions.rEpsilon=300;
 cgOptions.xyNoiseStd=0;
 
 
-kNeighs=5;
-
 shuffleMode=options.shuffleMode;
 fixedTypes=options.fixedNodes;
 
@@ -123,8 +132,8 @@ if length(findall(0))>1
     delete(findall(0));
 end
 
-cgOptions.numNeighs=kNeighs;
-[G,gStruct, cellTypes]=creatGraph(folderName,cgOptions);
+cgOptions.numNeighs=options.numNeighs;
+[G,gStruct,TOut, nodeTypes]=creatAGraph(folderName,cgOptions);
 
 trNumShuffle=trNumShuffleo;
 
@@ -148,12 +157,13 @@ shConfig.xyCoordinates=xyCoordinates;
 gHLoptions.isPlotEdges=false;
 
 if isempty(options.alphabet)
-    cTypeChars = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', char((198:198+length(cellTypes)-53))];
-    cellTypesOne=cTypeChars(1:length(cellTypes));
+    cTypeChars = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', char((198:198+length(nodeTypes)-53))];
+    cellTypesOne=cTypeChars(1:length(nodeTypes));
 else
     cellTypesOne=options.alphabet;
 end
-cellTypesOne=cellTypesOne(:);
+alphabet=cellTypesOne;
+cellTypesOne=string(cellTypesOne(:));
 
 
 gHLoptions.is3D=false;
@@ -169,8 +179,70 @@ end
 
 
 
-%% Type Shuffling
 
+
+
+%% Sample Paths from the Graph, Rand_ESU, or Random Walk
+
+pathLength=W;
+samPro=options.samplingFreq;
+
+
+enOptions.pdv=[ones(1,pathLength-1), samPro];
+enOptions.k=pathLength;
+enOptions.isChRadial=true;
+
+
+[pathList, ~, nodeSections, pathWeights]=URPEN(gStruct,enOptions);
+
+%%
+
+neighNodesC=cell(length(gStruct), 1);
+
+pathListAll=vertcat(pathList{:});
+
+neighDepth=options.neighDepth;
+
+for v=1:length(gStruct.neighs)
+
+    if ~any(cPTypes(v)==fixedTypes)
+        neighNodesT=v;
+
+        for iDepth=1:neighDepth
+            neighNodesT=gStruct.neighs(neighNodesT);
+            neighNodesT=vertcat(neighNodesT{:});
+        end
+        neighNodesT=unique(neighNodesT);
+
+
+        neighNodesFlag=ismember(pathListAll(:), neighNodesT);
+        neighNodesFlag=reshape(neighNodesFlag, size(pathListAll));
+        neighNodesFlag=any(neighNodesFlag, 2);
+
+
+
+    
+        neighNodes=pathListAll(neighNodesFlag, :);
+        neighNodes=unique(neighNodes(:));
+        neighNodesTypes=cPTypes(neighNodes);
+        neighNodes(ismember(neighNodesTypes, fixedTypes))=[];
+    
+        neighNodesC{v}=neighNodes;
+    end
+
+
+
+
+
+end
+
+pathListAll=[];
+
+shConfig.nearNeighs=neighNodesC;
+neighNodesC=[];
+
+%% Type Shuffling
+shConfig.partitionInd=[];
 shConfig.fixedNodes=[];
 shConfig.shuffleMode=shuffleMode;
 shConfig.rEpsilon=cgOptions.rEpsilon;
@@ -179,16 +251,8 @@ shConfig.isSectShuffle=true;
 shConfig.numClusters=20;
 shConfig.cSections=cSections;
 shConfig.fixedTypes=fixedTypes;
-shConfig.nearNeighs=[];
 shConfig.numClusters=1;
 shConfig.numShuffle=trNumShuffleo;
-if strcmpi(shuffleMode, "kernelPath")
-    nodePathShuffle=enumerateUSROPaths(gStruct, 8, ones(1,8));
-    shConfig.nearNeighs=nodePathShuffle;
-end
-
-
-
 cNTypes=getShuffleTypes(cPTypes, shConfig);
 if isPlotGraph
     gHLoptions.folderName=outputFolderName;
@@ -200,21 +264,19 @@ cPTypesU=(1:length(cellTypesOne));
 PWMT=sum(cPTypes(:)==(cPTypesU(:)).');
 PWMT=PWMT/sum(PWMT);
 
-figure('WindowState' ,'maximize')
+figure
+subplot(1, 2, 1)
 bar(cPTypesU, PWMT)
 grid on
 xlabel('cell type')
 ylabel('frequency')
 text(cPTypesU-0.5, PWMT+0.001, cellTypesOne)
 title('Primary background')
-figname=strcat(outputFolderName,'PrimaryBg', fignamExtnd);
-
-saveas(gcf,figname)
-
+% figname=strcat(outputFolderName,'PrimaryBg', fignamExtnd);
 
 PWMTNK=sum(cNTypes(:)==cPTypesU);
 PWMTNK=PWMTNK/sum(PWMTNK);
-figure('WindowState' ,'maximize')
+subplot(1, 2, 2)
 bar(cPTypesU, PWMTNK)
 grid on
 xlabel('cell type')
@@ -225,38 +287,6 @@ title('kernel shuffled background')
 figname=strcat(outputFolderName,'kernelShfBg', fignamExtnd);
 
 saveas(gcf,figname)
-
-
-alphabet=cellTypesOne;
-
-PWMT(PWMT==0)=0.0001;
-PWMTNK(PWMTNK==0)=0.0001;
-
-PWMRatio=PWMTNK./PWMT;
-
-figure
-
-plot(cPTypesU, PWMRatio, 'LineWidth',1.5)
-grid on
-title('Freq ratio kernel\\primari')
-figname=strcat(outputFolderName,'kernelPrimBgRatio', fignamExtnd);
-
-saveas(gcf,figname)
-
-
-
-%% Sample Paths from the Graph, Rand_ESU, or Random Walk
-
-pathLength=W;
-samPro=options.upd;
-
-
-enOptions.pdv=[ones(1,pathLength-1), samPro];
-enOptions.k=pathLength;
-enOptions.isChRadial=true;
-
-
-[pathList, ~, nodeSections, pathWeights]=enumerateUSRKPathsTest(gStruct,enOptions);
 
 
 %% Generate Shuffled data with k-mers presereved
@@ -286,7 +316,7 @@ delete(gcp('nocreate'))
 indSeedMode=false;
 isUBack=false;
 
-[extMotif,textOut, commandText, background]=mtStreme(cPTypes=cPTypes0, cNTypes=cNTypes0,cPHTypes=cPTypes,cNHTypes=cNTypes(1:length(cPTypes)),pSeq=posSeq, ...
+[extMotif,textOut, commandText, background]=mtSmore(cPTypes=cPTypes0, cNTypes=cNTypes0,cPHTypes=cPTypes,cNHTypes=cNTypes(1:length(cPTypes)),pSeq=posSeq, ...
     posWeight=posWeight, negWeight=negWeight, rvp=gOptions.rvp, mkvOrder=gOptions.mkvOrder, wMin=W, wMax=W,threshold=options.threshold, nmotifs=options.nmotifs,alphabet=alphabet, ...
     isEraseNodes=isEraseNodes,fixedTypes=fixedTypes,shConfig=shConfig,shuffleMode=shuffleModeGMaps,  nRefIter=options.nRefIter, isUBack=isUBack, trNumShuffle=trNumShuffle, diffMotif=options.diffMotif, indSeedMode=indSeedMode,...
     gTrainNum=options.gTrainNum, isEnrich=options.isEnrich, scIterMax=options.scIterMax, patience=options.patience,NREF=options.NREF, NEVAL=options.NEVAL);
@@ -338,7 +368,7 @@ end
 
 bkg.PWM0=background{1};
 bkg.mkvOrder=gOptions.mkvOrder;
-filename=strcat(outputFolderName, 'zSTREME','_Hypo', num2str(W), '.txt');
+filename=strcat(outputFolderName, 'report', num2str(W), '.txt');
 writeTextOutput(filename, extMotif,bkg,  textOut,commandText, elapsedTime);
 
 
@@ -352,14 +382,14 @@ fprintf('shuffling method %s and numFixedTypes %d finished at : %s\n', shuffleMo
 
 %% Seqlogo
 
-
+cTypeChars=alphabet;
 
 for iexMotif=1:numExtMotifs
 
     exMotifi=extMotif{iexMotif};
     exMotifi.background=background;
 
-    [~, hfig, cTypeChars] = seqlogoRet(exMotifi);
+    [~, hfig] = seqlogoGen(exMotifi, alphabet);
     [~, exMotifi.cSeed]=max(exMotifi.PWM);
 
     cSeedStr = strjoin(string(exMotifi.cSeed), '_');
@@ -461,7 +491,7 @@ save(saveFileName, '-regexp', '^(?!(extMotifC|hfig|lengthList|listLength|lengthL
 for iMG=1:numExtMotifs
 
 
-    figure('WindowState' ,'maximize')
+    figure
 
     h3=plot(G,'XData',xcoordsTotal,'YData',ycoordsTotal);
 

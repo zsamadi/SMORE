@@ -117,44 +117,25 @@ for testId=1:size(testMat, 1)
 
                 numFixedTypes=14*double(~testi(3));
 
-
-
-
-                % delete(gcp('nocreate'))
-                % parpool;
                 rng(1750);
                 %% Hyperparameters
-                % Hyperparameters for Creating Graph
-                RBPDiscard=false;           % Discard RBP Cells from downward analysis.
 
-                % Hyperparameters for Random Walk
                 isEraseNodes=true;
-                % numFixedTypes=14;
                 fixedTypes=(0:numFixedTypes);
                 fixedTypes=fixedTypes(:);
 
-                % shuffleMode='shuffle'; %can be 'oShuffle', 'cluster', 'kernel', 'noise'
 
                 %% Creat Graph
-
-                % cNodes=(1:1000).';
-                % ucNodes=(1:100).';
-                %
-                % unqMersFlags=getZNICIL(cNodes,  ones(W, 1),ucNodes);
-
 
 
                 folderName='D:\nucla\P1\matIO\data\';
                 plotGraph=true;
-
-                % gathers all sub cell types into the main cell type
                 cgOptions.bregID=bregID;
 
                 cgOptions.ambigRatio=ambigRatio;
 
                 cgOptions.ambigType=84;
                 cgOptions.ambgSWTs=[26,57,31];
-                % fixedTypes=[fixedTypes;cgOptions.ambgSWTs(:)];
                 cgOptions.swRatio=0;
 
                 cgOptions.isNoiseCTS=false;
@@ -170,11 +151,6 @@ for testId=1:size(testMat, 1)
                 cgOptions.nNodesRand=cgOptions.nCTypesRand*840;
                 cgOptions.randCoords=false;
 
-                % cgOptions.isNBreg=~testi(2);
-                % cgOptions.isPBreg=testi(2);
-                % cgOptions.isFemale=~testi(3);
-                % cgOptions.isMale=testi(3);
-
                 cgOptions.isNBreg=true;
                 cgOptions.isPBreg=true;
                 cgOptions.isFemale=false;
@@ -188,15 +164,9 @@ for testId=1:size(testMat, 1)
                 outputFolderName=strcat(outputFolderName0, num2str(iDumb-1), '\');
 
 
-                % outputFolderName=strcat(outputFolderName, '\', num2str(iDumb-1), '\');
-
                 if ~exist(outputFolderName, 'dir')
                     mkdir(outputFolderName)
                 end
-
-                % logFile=strcat(outputFolderName, 'runlog.txt');
-                % fileID=fopen(logFile,'w');
-
 
                 fprintf('evaluating motifs with shuffling method %s and numFixedTypes %d \n', shuffleMode, numFixedTypes);
 
@@ -223,11 +193,6 @@ for testId=1:size(testMat, 1)
                     yGHLim=3500;
                 end
 
-                % rmeConfig.fixedTypes=fixedTypes;
-                % rmeConfig.gMode=cgOptions.gMode;
-                % rmeConfig.shuffleMode=shuffleMode;
-
-                % done=writeReadmeHypo(outputFolderName,  rmeConfig);
 
                 [T, cellTypesOut, ambigType]=readCellTable(folderName, cgOptions);
                 cgOptions.ambigType=ambigType;
@@ -322,15 +287,6 @@ neighNodesC=[];
 
                 shConfig.shuffleMode=shuffleMode;
 
-                if strcmpi(shuffleMode, 'noise')
-                    cgOptions.xyNoiseStd=3*edgeDistStd;
-                    [GR,gStructR, ~,  BregmaAllUR, AnimalIDIdxR, cellTableR]=creatHPGraph(T,outputFolderName,cgOptions);
-                    cNTypes=(GR.Nodes.label(:, 1)).';
-                    cSectionsR=(GR.Nodes.label(:, 2)).';
-                    cSectionsUR=unique(cSectionsR);
-                    xyCoordinatesR=GR.Nodes.Coordinates;
-                    [nodeListR, lengthListR, nodeSectionsR]=enumerateUSRKPaths(gStructR, pathLength, [ones(1,pathLength-1), samPro]);
-                else
                     shConfig.rEpsilon=cgOptions.rEpsilon;
                     shConfig.fixedTypes=fixedTypes;
                     shConfig.isSectShuffle=true;
@@ -341,7 +297,6 @@ neighNodesC=[];
                     shConfig.numShuffle=trNumShuffle;
 
                     cNTypes=getShuffleTypes(cPTypes, shConfig);
-                end
 
 
 
@@ -402,8 +357,6 @@ neighNodesC=[];
 
 
 
-                % [pathList, lengthList, nodeSections]=enumerateUSRKPathsTest(gStruct, pathLength, [ones(1,pathLength-1), samPro]);
-
 
 
 
@@ -412,12 +365,10 @@ neighNodesC=[];
                 gOptions.hFrac=0;
                 gOptions.mkvOrder=0;
                 gOptions.rvp=true;
-                % gOptions.isChar=false;
 
                 gOptions.isSectHold=true;
                 gOptions.isHExclsv=true;
 
-                % nodeSectionsN=nodeSections;
 
 
                 gOptions.numNodes=length(cPTypes);
@@ -427,7 +378,6 @@ neighNodesC=[];
 
                 numHLD=ceil(length(nodeSectionsGenu)/4);
 
-                % randiHold=nodeSectionsGenu(randperm(length(nodeSectionsGenu)));
                 randiHold=nodeSectionsGenu((1:length(nodeSectionsGenu)));
 
                 randiHold=randiHold(1:numHLD);
@@ -437,52 +387,16 @@ neighNodesC=[];
                 gOptions.numGRs=1;
                 [posSeq, pHoldSeq, cPTypes0, posWeight, pHoldWeight]=generateSeqs(pathList,pathWeights,nodeSectionsGen,cPTypes, gOptions);
 
-
-
-                % [posSeq, ~, cPTypes0]=generateSeqs(pathList,nodeSectionsGen,cPTypes, gOptions);
-                % pHoldSeq=posSeq;
                 shuffleModeGMaps=shuffleMode;
 
 
-                if strcmpi(shuffleMode, 'noise')
-                    trNumShuffle=1;
-                    nodeSectionsGenR=nodeSectionsR;
-                    nodeSectionsGenRu=unique(nodeSectionsGenR);
 
-                    % randiHoldR=randperm(length(nodeSectionsGenRu));
-                    % randiHoldR=randiHoldR(1:floor(length(nodeSectionsGenRu)/4));
-                    randiHoldR=randiHold;
-                    nodeSectionsGenR(ismember(nodeSectionsGenR,randiHoldR))=1;
-
-                    [~, ~, cNTypes0]=generateSeqs(nodeListR,nodeSectionsGenR,cNTypes, gOptions);
-                    shuffleModeGMaps= "kernel";
-                else
                     gOptions.numGRs=trNumShuffle;
                     [~, ~, cNTypes0, negWeight]=generateSeqs(pathList,pathWeights,nodeSectionsGen,cNTypes, gOptions);
 
-                    % if kNeighs==kNeighsMax
-                    %     [negSeq, ~, cNTypes0]=generateSeqs(nodeList,nodeSectionsGen,cNTypes, gOptions);
-                    % end
 
-                    % nHoldSeq=pHoldSeq;
-                end
-
-
-                % gOptions.isControl=true;
-                %
-                % [negSeq, nHoldSeq]=generateSeqs(pWordList,nodeSectionsGen,gOptions);
 
                 %% Identify Motifs
-
-
-
-
-
-
-
-
-
-                % cNTypes=cPTypes(randperm(length(cPTypes)));
 
 
 
@@ -556,15 +470,7 @@ neighNodesC=[];
 
                     ppHNodes=[sitesErased.pNodes(:);sitesErased.pHNodes(:)];
 
-
-
                     extMotif{iEx}=outMotif;
-
-                    % seqData.cPTypes(sitesErased.pNodes(:))=0;
-                    % seqData.cNTypes(sitesErased.nNodes(:))=0;
-                    % seqData.cPHTypes(sitesErased.pHNodes(:))=0;
-                    % seqData.cNHTypes(sitesErased.nHNodes(:))=0;
-
 
 
                 end

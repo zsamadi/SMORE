@@ -44,7 +44,7 @@ arguments
     options.scIterMax=2;
     options.gTrainNum=50;
     options.isEraseNodes=true;
-    options.fixedTypes=1;
+    options.fixedTypes=0;
     options.diffMotif=false;
     options.fileID=1;
     options.shConfig=[];
@@ -59,7 +59,7 @@ arguments
     options.indSeedMode=false;
     options.isOKSingleNC=true;
     options.isUHold=false;
-    options.isNormalTest=true;
+    options.isNormalTest=false;
 
 end
 

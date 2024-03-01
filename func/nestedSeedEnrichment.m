@@ -42,7 +42,7 @@ options.isPN=false;
 while (refIter<=nRefIter)
 
     posPWMS=scoreWords(allSeeds,PWMS, seqDataSpecs);
-    positiveFlags=posPWMS>=0;
+    positiveFlags=posPWMS>0;
 
 
     appxPvalues=allPvalues(positiveFlags);
@@ -76,6 +76,7 @@ while (refIter<=nRefIter)
             seedsWMax.pSeeds=unqMerP.seeds;
             seedsWMax.pSiteCell=unqMerP.siteCell;
             seedsWMax.pWeightCell=unqMerP.weightCell;
+            if ~isempty(unqMerP.seeds)
             seedsWMax.pSeedsIndex=(sum(unqMerP.seeds.*D15,2));
             appxSeedIndex=(sum(appxSeeds.*D15,2));
 
@@ -173,6 +174,9 @@ while (refIter<=nRefIter)
                 pvalSpecs=[nPos, nNeg];
             end
             pvalues=computePvalue(seedCntsThr, pvalSpecs, bernoulli);
+            else
+                pvalues=ones(size(appxPvalues));
+            end
 
         else
             pvalues=appxPvalues;
