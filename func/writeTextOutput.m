@@ -1,4 +1,4 @@
-function done=writeTextOutput(filename, motifsCell,bkg, textIn,commandText, elapsedTime)
+function done=writeTextOutput(filename, motifsCell,bkg, textIn,commandText, elapsedTime, alphabet)
 
 PWM0=bkg.PWM0;
 
@@ -15,9 +15,9 @@ starLine=repelem('*', 1, 50);
 starLine=strcat(starLine, '\n');
 
 fprintf(fileID,starLine);
-fprintf(fileID,'MATLAB zSTREME - Sensitive, Thorough, Rapid, Enriched Motif Elicitation\n');
+fprintf(fileID,'SMORE: Spatial Motif Recognition\n');
 fprintf(fileID,starLine);
-fprintf(fileID,'MEME version 5.5.0 (Release date: Wed Sep 7 14:18:26 2022 -0700)\n');
+fprintf(fileID,'version 1.1.0 (Release date: Wed March 6 14:18:26 2024 -0700)\n');
 fprintf(fileID,starLine);
 fprintf(fileID,'\n');
 
@@ -27,21 +27,25 @@ fprintf(fileID,starLine);
 fprintf(fileID,'REFERENCE\n');
 fprintf(fileID,starLine);
 
-fprintf(fileID,'Timothy L. Bailey,\n');
-fprintf(fileID,'"STREME: accurate and versatile sequence motif discovery",\n');
+fprintf(fileID,'Samadi Z., Askary A.,\n');
+fprintf(fileID,'Spatial motifs reveal patterns in cellular architecture of complex tissues,\n');
 
-fprintf(fileID,'Bioinformatics, Mar. 24, 2021.\n');
+fprintf(fileID,'BioRxiv, Mar. 7, 2024.\n');
 fprintf(fileID,starLine);
 fprintf(fileID,'\n');
 
 fprintf(fileID,'\n');
 fprintf(fileID,starLine);
-fprintf(fileID,'ALPHABET "ABCDEFGHIJKLMNO"\n');
+fprintf(fileID,sprintf('ALPHABET "%s"\n', alphabet));
 fprintf(fileID,starLine);
 
 fprintf(fileID,'Background letter frequencies\n');
 
-fprintf(fileID,'A %1.5f B %1.5f C %1.5f D %1.5f E %1.5f F %1.5f G %1.5f H %1.5f I %1.5f J %1.5f K %1.5f L %1.5f M %1.5f N %1.5f O %1.5f\n', PWM0);
+for ipw=1:length(PWM0)
+
+fprintf(fileID,'%c:%1.5f,', alphabet(ipw), PWM0(ipw));
+end
+fprintf(fileID,'\n');
 fprintf(fileID,'\n');
 
 for im=1:length(motifsCell)
@@ -53,7 +57,7 @@ for im=1:length(motifsCell)
 %     secSeediChar=char(secSeedi+64);
 
 
-    strText=strcat("MOTIF  ", num2str(im), '-', seediChar,' zSTREME-', num2str(im), '\n');
+    strText=strcat("MOTIF  ", num2str(im), '-', seediChar,' SMORE-', num2str(im), '\n');
     fprintf(fileID,strText);
 
     testPvalue=outMotif.testPvalue/log(10);
@@ -91,8 +95,6 @@ for im=1:length(motifsCell)
                 fprintf(fileID,'%d\t',(seedsHInfo(ii,1:end-1)));
                 fprintf(fileID,'train\\hold pvalues\t');
                 fprintf(fileID,'%2.2f\t',[seedsInfo(ii,end), seedsHInfo(ii,end)]);
-            else
-                check=1;
              end
 
             fprintf(fileID,'\n');

@@ -1,9 +1,8 @@
-function done = smore(dataFolder , options)
+function statOut=smore(dataFolder , options)
 
 arguments
     dataFolder.input='sampleDataEb.csv';
     dataFolder.output='output\';
-    options.fixedNodes=0;
     options.alphabet=[];
     options.NEVAL=25;
     options.NREF=4;
@@ -17,29 +16,41 @@ arguments
     options.gTrainNum=50;
     options.fixedTypes=0;
     options.diffMotif=false;
-    options.shuffleMode='kernel';
+    options.shuffleMode='shuffle';
     options.isEnrich=true;
     options.samplingFreq=0.2;
     options.gMode='delaunay';
     options.numNeighs=5;
     options.rEps=0;
     options.neighDepth=4;
-    options.isOKSingleNC=false;
+    options.isOKSingleNC=true;
 
 end
 clc
 
+LogicalStr = {'false', 'true'};
+
+commandText=sprintf(['smore(input=%s,...\n output=%s,... \n fixedTypes=%d,... \n  NEVAL=%d,... \n NREF=%d ,... \n WMotif=%d,... \n ' ...
+                   'nRefIter=%d,...\n threshold=%1.3f,...\n patience=%d,... \n nmotifs=%d,... \n scIterMax=%d,... \n  gTrainNum=%d,...\n ' ...
+                   'diffMotif=%b,...\n shuffleMode=%s,...\n isEnrich=%b,... \n samplingFreq=%1.2f,...\n gMode=%s,... \n numNeighs=%d,... ' ...
+                   '\n rEps=%d,... \n neighDepth=%d'], dataFolder.input,dataFolder.output,options.fixedTypes,options.NEVAL,options.NREF, ...
+                   options.WMotif,options.nRefIter,options.threshold,options.patience,options.nmotifs,options.scIterMax, ...
+                   options.gTrainNum,LogicalStr{options.diffMotif, options.shuffleMode,options.isEnrich,options.samplingFreq, ...
+                   options.gMode,options.numNeighs,options.rEps,options.neighDepth);
 
 
-fprintf('smore started with shuffling method "%s" and numFixedTypes "%d" \n', options.shuffleMode, options.fixedTypes);
+
+statOut=sprintf('smore started with shuffling method "%s" and numFixedTypes "%d" \n', options.shuffleMode, options.fixedTypes);
+
+fprintf(statOut);
 
 if strcmpi(options.shuffleMode, 'kernel')
     options.shuffleMode='kernelPath';
 end
 
-if length(findall(0))>1
-    delete(findall(0));
-end
+% if length(findall(0))>1
+%     delete(findall(0));
+% end
 
 cd(fileparts(which(mfilename)));
 cd('..\')
@@ -58,7 +69,7 @@ isPlotGraph=true;
 
 trNumShuffleo=1;
 
-rng(1650);
+
 %% Hyperparameters
 W=options.WMotif;
 isEraseNodes=true;
@@ -100,9 +111,9 @@ cgOptions.isNaive=true;
 cgOptions.isStimu=true;
 cgOptions.rEps=options.rEps;
 
-outputFolderName0=dataFolder.output;
+outputFolderName=dataFolder.output;
 
-outputFolderName0=strcat(outputFolderName0,'W', num2str(W));
+% outputFolderName0=strcat(outputFolderName0,'W', num2str(W));
 
 % if ~isTestMode
 %     outputFolderName0=strcat(outputFolderName0,'_',cStr);
@@ -125,12 +136,12 @@ cgOptions.xyNoiseStd=0;
 
 
 shuffleMode=options.shuffleMode;
-fixedTypes=options.fixedNodes;
+fixedTypes=options.fixedTypes;
 
-close all
-if length(findall(0))>1
-    delete(findall(0));
-end
+% close all
+% if length(findall(0))>1
+%     delete(findall(0));
+% end
 
 cgOptions.numNeighs=options.numNeighs;
 [G,gStruct,TOut, nodeTypes]=creatAGraph(folderName,cgOptions);
@@ -138,7 +149,7 @@ cgOptions.numNeighs=options.numNeighs;
 trNumShuffle=trNumShuffleo;
 
 
-outputFolderName=strcat(outputFolderName0, '\');
+% outputFolderName=strcat(outputFolderName0, '\');
 
 if ~exist(outputFolderName, 'dir')
     mkdir(outputFolderName)
@@ -264,7 +275,7 @@ cPTypesU=(1:length(cellTypesOne));
 PWMT=sum(cPTypes(:)==(cPTypesU(:)).');
 PWMT=PWMT/sum(PWMT);
 
-figure
+figure('visible','off');
 subplot(1, 2, 1)
 bar(cPTypesU, PWMT)
 grid on
@@ -311,7 +322,7 @@ delete(gcp('nocreate'))
 
 
 %% Identify Motifs
-
+rng(1650);
 
 indSeedMode=false;
 isUBack=false;
@@ -319,7 +330,7 @@ isUBack=false;
 [extMotif,textOut, commandText, background]=mtSmore(cPTypes=cPTypes0, cNTypes=cNTypes0,cPHTypes=cPTypes,cNHTypes=cNTypes(1:length(cPTypes)),pSeq=posSeq, ...
     posWeight=posWeight, negWeight=negWeight, rvp=gOptions.rvp, mkvOrder=gOptions.mkvOrder, wMin=W, wMax=W,threshold=options.threshold, nmotifs=options.nmotifs,alphabet=alphabet, ...
     isEraseNodes=isEraseNodes,fixedTypes=fixedTypes,shConfig=shConfig,shuffleMode=shuffleModeGMaps,  nRefIter=options.nRefIter, isUBack=isUBack, trNumShuffle=trNumShuffle, diffMotif=options.diffMotif, indSeedMode=indSeedMode,...
-    gTrainNum=options.gTrainNum, isEnrich=options.isEnrich, scIterMax=options.scIterMax, patience=options.patience,NREF=options.NREF, NEVAL=options.NEVAL);
+    gTrainNum=options.gTrainNum, isEnrich=options.isEnrich, scIterMax=options.scIterMax, patience=options.patience,NREF=options.NREF, NEVAL=options.NEVAL, isOKSingleNC=options.isOKSingleNC);
 elapsedTime=toc(timerValue);
 
 %%  resolve motif nodes
@@ -369,7 +380,7 @@ end
 bkg.PWM0=background{1};
 bkg.mkvOrder=gOptions.mkvOrder;
 filename=strcat(outputFolderName, 'report', num2str(W), '.txt');
-writeTextOutput(filename, extMotif,bkg,  textOut,commandText, elapsedTime);
+writeTextOutput(filename, extMotif,bkg,  textOut,commandText, elapsedTime, alphabet);
 
 
 numExtMotifs=length(extMotif);
@@ -377,7 +388,8 @@ numExtMotifs=length(extMotif);
 ProfDateNum=datetime("now");
 numFixedTypes=length(fixedTypes);
 
-fprintf('shuffling method %s and numFixedTypes %d finished at : %s\n', shuffleMode, numFixedTypes, ProfDateNum);
+statOut=sprintf('shuffling method %s and numFixedTypes %d finished at : %s\n', shuffleMode, numFixedTypes, ProfDateNum);
+fprintf(statOut);
 
 
 %% Seqlogo
@@ -412,7 +424,7 @@ for iexMotif=1:numExtMotifs
 
 end
 
-figure
+figure('visible','off');
 plot(pvalueVec, '-kv', 'LineWidth',1)
 grid on
 
@@ -444,7 +456,7 @@ end
 
 readmeFileName=strcat(outputFolderName,'readme.txt');
 rmeConfig.isEraseFixed=false;
-writeReadmeNRet(readmeFileName, fixedTypes, rmeConfig);
+writeReadme(readmeFileName, fixedTypes, rmeConfig);
 
 %% Node Analyze
 
@@ -481,8 +493,8 @@ end
 
 
 
-saveFileName=strcat(outputFolderName,'matData', filenamExtnd);
-save(saveFileName, '-regexp', '^(?!(extMotifC|hfig|lengthList|listLength|lengthListR|listLengthR|nodeListR|nodeSectionsR|nHoldSeq|negSeq|pHoldSeq|posSeq|seqData)$).')
+% saveFileName=strcat(outputFolderName,'matData', filenamExtnd);
+% save(saveFileName, '-regexp', '^(?!(extMotifC|hfig|lengthList|listLength|lengthListR|listLengthR|nodeListR|nodeSectionsR|nHoldSeq|negSeq|pHoldSeq|posSeq|seqData)$).')
 
 
 %% Highlight Intersections
@@ -491,7 +503,7 @@ save(saveFileName, '-regexp', '^(?!(extMotifC|hfig|lengthList|listLength|lengthL
 for iMG=1:numExtMotifs
 
 
-    figure
+    figure('visible','off');
 
     h3=plot(G,'XData',xcoordsTotal,'YData',ycoordsTotal);
 
@@ -560,7 +572,6 @@ for iMG=1:numExtMotifs
 
 end
 
-done=1;
 
 
 

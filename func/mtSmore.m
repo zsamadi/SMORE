@@ -71,7 +71,7 @@ end
 options.MinSeedWidth=min(options.wMin, options.MinSeedWidth);
 options.addPos=1;
 
-commandText= sprintf("mStreme(pSeq={input data}  ,nSeq=={shuffled data},pHSeq={positive holdout seq}, nHSeq={control holdout seq},...\n PWM0={bg frequency}, wMin=%d, wMax=%d,threshold=%10.10f, alphabet={input alphabet})",...
+commandText= sprintf("smore(pSeq={input data}  ,nSeq=={shuffled data},pHSeq={positive holdout seq}, nHSeq={control holdout seq},...\n PWM0={bg frequency}, wMin=%d, wMax=%d,threshold=%10.10f, alphabet={input alphabet})",...
     options.wMin, options.wMax, options.threshold);
 
 

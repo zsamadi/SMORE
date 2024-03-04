@@ -1,7 +1,5 @@
 function [nodeList, listLength, pathSections, subPathWC]=URPEN(gStruct, options)
 
-pdv=options.pdv;
-pdv=pdv(2:end);
 vertexVec=(1:length(gStruct.neighs));
 numVertex=length(vertexVec);
 subPathCell=cell(numVertex,1);
@@ -9,7 +7,6 @@ subPathWC=cell(numVertex,1);
 pathSections=cell(numVertex,1);
 gStructNeighs=gStruct.neighs;
 gStructWeights=gStruct.weights;
-options.pdv=pdv;
 listLength=zeros(length(gStructNeighs), 1);
 
 parfor v=1:length(gStructNeighs)
@@ -59,7 +56,7 @@ else
         VExtension(end)=[];
         w=WExtension(end);
         WExtension(end)=[];
-        effectProb=pdv(length(VSubgraph));
+        effectProb=pdv(length(VSubgraph)+1);
         randi=rand;
         goEhead=randi<effectProb;
         if (goEhead)

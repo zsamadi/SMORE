@@ -406,7 +406,7 @@ setpixelposition(hFigure,pos);
                                        [0, 0, pos(3), pos(4)], hFigure);
 
 set(logoContainer, 'units', 'normalized');
-set(hFigure, 'visible', 'on')
+set(hFigure, 'visible', 'off')
 
 
 end %seqshowlogo
