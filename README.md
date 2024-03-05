@@ -29,7 +29,7 @@ __Sample Input Graph__
 samplingFreq | sampling frequency for URPEN method | 1
 WMotif | motif length | 4
 __SMORE Configuration__
-nMotifs |number of output motifs, overrides threshold settings.| 5
+nMotifs |number of output motifs| 5
 fixedTypes |Vector of fixed cell types, if set to 0, no cell type is fixed. Single fixed cell types can be entered as integers. For example,  fixedTypes=1 is equivalent to cell type 1 being fixed. fixedTypes=[1, 3] implies that cell types 1 and 3 are fixed | 0
 nTrain | number of control data generated for training | 50
 nScore |number of control data generated for scoring | 1
