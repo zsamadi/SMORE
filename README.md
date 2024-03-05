@@ -11,7 +11,7 @@ A sample input data table with 7 fields,
    
 [run](https://github.com/zsamadi/SMORE/tree/main/run)
 
-This folder contains main execution function for the algorithm. Entering smore without any option in the MATLAB command window will run the algorithm with default settings. The default input data is "sampleData.csv" in "data" folder that contains a random network with motif (A/B)CDE embedded in it. Output results and related figures will be saved in the "output" folder by default. The  settings for the algorithm along with their description and default values are provided in the following table. 
+This folder contains main execution function for the algorithm. Entering smore without any option in the MATLAB command window will run the algorithm with default settings. The default input data is "sampleDataEb.csv" in "data" folder that contains a random network with motif (A/B)CDE embedded in it. Output results and related figures will be saved in the "output" folder by default. The  settings for the algorithm along with their description and default values are provided in the following table. 
 Options |Description | Default 
 --- | --- | --- 
 __Input\Output__
