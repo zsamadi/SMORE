@@ -8,6 +8,7 @@ A sample input data table with 7 fields,
 2. nodeType: cell type or cluster ID, this sample dataset has 12 cell types.
 3. Centroid_X, Centroid_Y: spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
 4. gene_i: the expression for genes. gene names are arbitrary as long as they're on the columns after spatial coordinates. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
+   
 [run](https://github.com/zsamadi/SMORE/tree/main/run)
 
 This folder contains main execution function for the algorithm. Entering smore without any option in the MATLAB command window will run the algorithm with default settings. The default input data is "sampleData.csv" in "data" folder that contains a random network with motif (A/B)CDE embedded in it. Output results and related figures will be saved in the "output" folder by default. The  settings for the algorithm along with their description and default values are provided in the following table. 
