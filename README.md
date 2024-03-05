@@ -51,7 +51,7 @@ Contains related functions for running smore. This folder should be at the same 
 
 [output](https://github.com/zsamadi/SMORE/tree/main/output)
 
-Default folder for saving the output results. The folder currently contains output results of running the algorithm on the default input of "sampleData.csv" file. 
+Default folder for saving the output results. The folder currently contains output results of running the algorithm on the default input of "sampleDataEb.csv" file. 
 
 
 
