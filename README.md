@@ -42,7 +42,7 @@ nRefineIter |maximum number of iterations for enrichment | 20
 you can use following command to modify smore options. 
 
 
-`smore(input='sampleDataEb.csv', output='output', WMotif=4, nmotifs=5, fixedTypes=0, gTrainNum=50, scIterMax=1, shuffleMode='shuffle', samplingFreq=1.0, gMode='delaunay', numNeighs=5, rEps=0, neighDepth=4, isEnrich=true, diffMotif=false, NEVAL=25, NREF=4, nRefIter=20)`
+`smore(input='sampleDataEb.csv', output='output', WMotif=4, nMotifs=5, fixedTypes=0, nTrain=50, nScore=1, shuffleMode='shuffle', samplingFreq=1.0, gMode='delaunay', nNeighs=5, rEps=0, neighDepth=4, isEnrich=true, diffMotif=false, nEval=25, nRefine=4, nRefineIter=20)`
 
 
 [func](https://github.com/zsamadi/SMORE/tree/main/func)
