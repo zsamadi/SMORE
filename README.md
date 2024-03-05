@@ -20,7 +20,7 @@ output | output folder | 'output'
 __Create Graph__
 gMode | The method for creating the graph(options: 'delaunay', 'knn', 'epsilon') | 'delaunay'
 ND | Spatial dimensionality of the input data, if it's set to 0, it looks for the dimensionality of the data from input file (options:0, 2, 3) | 0
-numNeighs |Number of neighbors for the knn method | 5
+nNeighs |Number of neighbors for the knn method | 5
 rEps |Epsilon radius for epsilon method of creating the graph| 50
 __Generate Control Data__
 shuffleMode | Shuffling method for creating the control data (options: 'shuffle', 'kernel') | 'shuffle'
@@ -29,15 +29,15 @@ __Sample Input Graph__
 samplingFreq | sampling frequency for URPEN method | 1
 WMotif | motif length | 4
 __SMORE Configuration__
-nmotifs |number of output motifs, overrides threshold settings.| 5
+nMotifs |number of output motifs, overrides threshold settings.| 5
 fixedTypes |Vector of fixed cell types, if set to 0, no cell type is fixed. Single fixed cell types can be entered as integers. For example,  fixedTypes=1 is equivalent to cell type 1 being fixed. fixedTypes=[1, 3] implies that cell types 1 and 3 are fixed | 0
-gTrainNum | number of control data generated for training | 50
-scIterMax |number of control data generated for scoring | 1
+nTrain | number of control data generated for training | 50
+nScore |number of control data generated for scoring | 1
 isEnrich | Switch for performing enrichment or not (options: true, false) | true
 diffMotif |differential enrichment (options: true, false)  | false 
-NEVAL | number of seeds from initial evaluation | 25
-NREF |  number of seeds from initial refinement  | 4
-nRefIter |maximum number of iterations for enrichment | 20
+nEval | number of seeds from initial evaluation | 25
+nRefine |  number of seeds from initial refinement  | 4
+nRefineIter |maximum number of iterations for enrichment | 20
 
 you can use following command to modify smore options. 
 
