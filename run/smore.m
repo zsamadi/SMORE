@@ -1,41 +1,41 @@
-function statOut=smore(dataFolder , options)
+function smore(dataFolder , options)
 
 arguments
     dataFolder.input='sampleDataEb.csv';
     dataFolder.output='output';
     options.alphabet=[];
-    options.NEVAL=25;
-    options.NREF=4;
+    options.nEval=25;
+    options.nRefine=4;
     options.WMotif=4;
-    options.nRefIter=20;
+    options.nRefineIter=20;
     options.threshold=0.005;
     options.patience=3;
-    options.nmotifs=5;
+    options.nMotifs=5;
     options.isErzHOut=true;
-    options.scIterMax=10;
-    options.gTrainNum=50;
+    options.nScore=1;
+    options.nTrain=50;
     options.fixedTypes=0;
     options.diffMotif=false;
     options.shuffleMode='shuffle';
     options.isEnrich=true;
-    options.samplingFreq=0.5;
+    options.samplingFreq=1;
     options.gMode='delaunay';
     options.numNeighs=5;
     options.rEps=0;
     options.neighDepth=4;
-    options.isOKSingleNC=true;
+    options.ND=0;
 
 end
 clc
 
 LogicalStr = {'false', 'true'};
 
-commandText=sprintf(['smore(input=%s,...\n output=%s,... \n fixedTypes=%d,... \n  NEVAL=%d,... \n NREF=%d ,... \n WMotif=%d,... \n ', ...
-                   'nRefIter=%d,...\n threshold=%1.3f,...\n patience=%d,... \n nmotifs=%d,... \n scIterMax=%d,... \n  gTrainNum=%d,...\n ', ...
-                   'diffMotif=%s,...\n shuffleMode=%s,...\n isEnrich=%s,... \n samplingFreq=%1.2f,...\n gMode=%s,... \n numNeighs=%d,... ', ...
-                   '\n rEps=%d,... \n neighDepth=%d)'], dataFolder.input,dataFolder.output,options.fixedTypes,options.NEVAL,options.NREF, ...
-                   options.WMotif,options.nRefIter,options.threshold,options.patience,options.nmotifs,options.scIterMax, ...
-                   options.gTrainNum,LogicalStr{options.diffMotif+1}, options.shuffleMode,LogicalStr{options.isEnrich+1},options.samplingFreq, ...
+commandText=sprintf(['smore(input="%s",...\n output="%s",... \n fixedTypes=%d,... \n  nEval=%d,... \n nRefine=%d ,... \n WMotif=%d,... \n ', ...
+                   'nRefineIter=%d,...\n nmotifs=%d,... \n nScore=%d,... \n  nTrain=%d,...\n ', ...
+                   'diffMotif=%s,...\n shuffleMode="%s",...\n isEnrich=%s,... \n samplingFreq=%1.2f,...\n gMode="%s",... \n numNeighs=%d,... ', ...
+                   '\n rEps=%d,... \n neighDepth=%d)'], dataFolder.input,dataFolder.output,options.fixedTypes,options.nEval,options.nRefine, ...
+                   options.WMotif,options.nRefineIter,options.nMotifs,options.nScore, ...
+                   options.nTrain,LogicalStr{options.diffMotif+1}, options.shuffleMode,LogicalStr{options.isEnrich+1},options.samplingFreq, ...
                    options.gMode,options.numNeighs,options.rEps,options.neighDepth);
 
 
@@ -48,24 +48,13 @@ if strcmpi(options.shuffleMode, 'kernel')
     options.shuffleMode='kernelPath';
 end
 
-% if length(findall(0))>1
-%     delete(findall(0));
-% end
-
 cd(fileparts(which(mfilename)));
 cd('..\')
 
 addpath(genpath(pwd))
 
-isTestMode=false;
 isPlotGraph=true;
 
-% c=clock;
-% c=c(1:end-1);
-% cStr=string(c(1));
-% for ic=2:length(c)-1
-%     cStr=strcat(cStr, '_', string(c(ic)));
-% end
 
 trNumShuffleo=1;
 
@@ -111,27 +100,15 @@ cgOptions.isNaive=true;
 cgOptions.isStimu=true;
 cgOptions.rEps=options.rEps;
 
-outputFolderName=dataFolder.output;
-
-% outputFolderName0=strcat(outputFolderName0,'W', num2str(W));
-
-% if ~isTestMode
-%     outputFolderName0=strcat(outputFolderName0,'_',cStr);
-% end
+outputFolderName=strcat(dataFolder.output, '\');
 
 
 
-if cgOptions.isRandom
-    fignamExtnd='Random.jpeg';
-    filenamExtnd='Random.mat';
-
-else
-    fignamExtnd='bipolar.jpeg';
-    filenamExtnd='bipolar.mat';
-end
+fignamExtnd='.jpeg';
 
 
-cgOptions.rEpsilon=300;
+
+cgOptions.rEpsilon=0;
 cgOptions.xyNoiseStd=0;
 
 
@@ -144,6 +121,7 @@ fixedTypes=options.fixedTypes;
 % end
 
 cgOptions.numNeighs=options.numNeighs;
+cgOptions.ND=options.ND;
 [G,gStruct,~, nodeTypes]=creatAGraph(folderName,cgOptions);
 
 trNumShuffle=trNumShuffleo;
@@ -208,49 +186,33 @@ enOptions.isChRadial=true;
 
 %%
 
-neighNodesC=cell(length(gStruct), 1);
-
-pathListAll=vertcat(pathList{:});
-
-neighDepth=options.neighDepth;
-
-for v=1:length(gStruct.neighs)
-
-    if ~any(cPTypes(v)==fixedTypes)
-        neighNodesT=v;
-
-        for iDepth=1:neighDepth
-            neighNodesT=gStruct.neighs(neighNodesT);
-            neighNodesT=vertcat(neighNodesT{:});
+if strcmpi(options.shuffleMode, 'kernel')
+    shConfig.nearNeighs=cell(length(gStruct), 1);    
+    pathListAll=vertcat(pathList{:});    
+    neighDepth=options.neighDepth;    
+    for v=1:length(gStruct.neighs)    
+        if ~any(cPTypes(v)==fixedTypes)
+            neighNodesT=v;    
+            for iDepth=1:neighDepth
+                neighNodesT=gStruct.neighs(neighNodesT);
+                neighNodesT=vertcat(neighNodesT{:});
+            end
+            neighNodesT=unique(neighNodesT);    
+            neighNodesFlag=ismember(pathListAll(:), neighNodesT);
+            neighNodesFlag=reshape(neighNodesFlag, size(pathListAll));
+            neighNodesFlag=any(neighNodesFlag, 2);        
+            neighNodes=pathListAll(neighNodesFlag, :);
+            neighNodes=unique(neighNodes(:));
+            neighNodesTypes=cPTypes(neighNodes);
+            neighNodes(ismember(neighNodesTypes, fixedTypes))=[];        
+            shConfig.nearNeighs{v}=neighNodes;
         end
-        neighNodesT=unique(neighNodesT);
-
-
-        neighNodesFlag=ismember(pathListAll(:), neighNodesT);
-        neighNodesFlag=reshape(neighNodesFlag, size(pathListAll));
-        neighNodesFlag=any(neighNodesFlag, 2);
-
-
-
     
-        neighNodes=pathListAll(neighNodesFlag, :);
-        neighNodes=unique(neighNodes(:));
-        neighNodesTypes=cPTypes(neighNodes);
-        neighNodes(ismember(neighNodesTypes, fixedTypes))=[];
-    
-        neighNodesC{v}=neighNodes;
     end
-
-
-
-
-
+    pathListAll=[];
+else
+    shConfig.nearNeighs=[];
 end
-
-pathListAll=[];
-
-shConfig.nearNeighs=neighNodesC;
-neighNodesC=[];
 
 %% Type Shuffling
 shConfig.partitionInd=[];
@@ -328,9 +290,9 @@ indSeedMode=false;
 isUBack=false;
 
 [extMotif,textOut, ~, background]=mtSmore(cPTypes=cPTypes0, cNTypes=cNTypes0,cPHTypes=cPTypes,cNHTypes=cNTypes(1:length(cPTypes)),pSeq=posSeq, ...
-    posWeight=posWeight, negWeight=negWeight, rvp=gOptions.rvp, mkvOrder=gOptions.mkvOrder, wMin=W, wMax=W,threshold=options.threshold, nmotifs=options.nmotifs,alphabet=alphabet, ...
-    isEraseNodes=isEraseNodes,fixedTypes=fixedTypes,shConfig=shConfig,shuffleMode=shuffleModeGMaps,  nRefIter=options.nRefIter, isUBack=isUBack, trNumShuffle=trNumShuffle, diffMotif=options.diffMotif, indSeedMode=indSeedMode,...
-    gTrainNum=options.gTrainNum, isEnrich=options.isEnrich, scIterMax=options.scIterMax, patience=options.patience,NREF=options.NREF, NEVAL=options.NEVAL, isOKSingleNC=options.isOKSingleNC);
+    posWeight=posWeight, negWeight=negWeight, rvp=gOptions.rvp, mkvOrder=gOptions.mkvOrder, wMin=W, wMax=W,threshold=options.threshold, nmotifs=options.nMotifs,alphabet=alphabet, ...
+    isEraseNodes=isEraseNodes,fixedTypes=fixedTypes,shConfig=shConfig,shuffleMode=shuffleModeGMaps,  nRefIter=options.nRefineIter, isUBack=isUBack, trNumShuffle=trNumShuffle, diffMotif=options.diffMotif, indSeedMode=indSeedMode,...
+    gTrainNum=options.nTrain, isEnrich=options.isEnrich, scIterMax=options.nScore, patience=options.patience,NREF=options.nRefine, NEVAL=options.nEval);
 elapsedTime=toc(timerValue);
 
 %%  resolve motif nodes
@@ -379,7 +341,7 @@ end
 
 bkg.PWM0=background{1};
 bkg.mkvOrder=gOptions.mkvOrder;
-filename=strcat(outputFolderName, 'report', num2str(W), '.txt');
+filename=strcat(outputFolderName, 'out.txt');
 writeTextOutput(filename, extMotif,bkg,  textOut,commandText, elapsedTime, alphabet);
 
 

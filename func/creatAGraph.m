@@ -3,6 +3,22 @@ function [G,gStruct, TOut, nodeTypeVecU]=creatAGraph(filename, options)
 
 T = readtable(filename);
 
+if options.ND==0
+    varNames=T.Properties.VariableNames;
+    if strcmpi(varNames{5}, 'Centroid_Z')
+        haveZ=true;
+    else
+         haveZ=false;
+    end
+elseif  options.ND==3
+    haveZ=true;
+else
+ haveZ=false;
+end
+
+
+
+
 AID=T.NID;
 BIDAll=ones(size(AID));
 BIDAllU=unique(BIDAll);
@@ -17,8 +33,7 @@ nearNeighsia=cell(length(AIDIdx),1);
 
 edgesUniqueTotal=cell(length(AIDIdx),1);
 numcellsTotal=0;
-xcoordsTotal=cell(1000,1);
-ycoordsTotal=cell(1000,1);
+coordsTotal=cell(1000,1);
 nodeTypeVecTotal=cell(1000,1);
 cellSectionVecTotal=cell(1000,1);
 
@@ -51,22 +66,38 @@ for iAID=1:length(AIDIdx)
         xcoords=xcoords-mean(xcoords);
         ycoords=T2.Centroid_Y;
         ycoords=ycoords-mean(ycoords);
+
+        if haveZ
+            zcoords=T2.Centroid_Z;
+            zcoords=zcoords-mean(zcoords);
+        end
+
+
+
+
         nodeTypeVec=T2.nodeType;
 
         cellSectionVec=ones(length(nodeTypeVec),1);
 
         cellSectionVec(:)=(AIDi-1)*length(BIDAllU)+BInAll(iBID);
         
-        xcoordsTotal{iABID}=xcoords+xshift;
-        ycoordsTotal{iABID}=ycoords+yshift;
         nodeTypeVecTotal{iABID}=nodeTypeVec;
         cellSectionVecTotal{iABID}=cellSectionVec;
         numcells=length(nodeTypeVec);
-        zcoords=[xcoords, ycoords];
+        if haveZ
+            xyzcoords=[xcoords, ycoords, zcoords];
+            coordsTotal{iABID}=[xcoords+xshift, ycoords+yshift, zcoords];
+
+        else
+            xyzcoords=[xcoords, ycoords];
+            coordsTotal{iABID}=[xcoords+xshift, ycoords+yshift];
+
+        end
+
         if strcmpi(options.gMode,"delaunay")
 
 
-            Delauney_Triangle=delaunayTriangulation(zcoords);
+            Delauney_Triangle=delaunayTriangulation(xyzcoords);
 
             connectTriangle=Delauney_Triangle.ConnectivityList;
 
@@ -75,7 +106,7 @@ for iAID=1:length(AIDIdx)
 
             numNeighs=options.numNeighs;
 
-            nearNeighs = knnsearch(zcoords,zcoords, 'K',numNeighs);
+            nearNeighs = knnsearch(xyzcoords,xyzcoords, 'K',numNeighs);
 
             edges1=repelem(nearNeighs(:, 1), numNeighs-1, 1);
             edges2=nearNeighs(:, 2:end);
@@ -87,11 +118,11 @@ for iAID=1:length(AIDIdx)
                 rEps=options.rEps;
             else
                 numNeighs=2;
-                [~, D] = knnsearch(zcoords,zcoords, 'K',numNeighs);
+                [~, D] = knnsearch(xyzcoords,xyzcoords, 'K',numNeighs);
                 DS=sort(D(:));
                 rEps=DS(end-10);
             end
-            nearNeighs = rangesearch(zcoords,zcoords, rEps);
+            nearNeighs = rangesearch(xyzcoords,xyzcoords, rEps);
             edges=cell(length(nearNeighs),1);
             for iin=1:length(nearNeighs)
                 nearNeighsi=nearNeighs{iin};
@@ -112,7 +143,7 @@ for iAID=1:length(AIDIdx)
         end
 
            rEps=options.rEpsilon;
-           neighsi= rangesearch(zcoords,zcoords, rEps);
+           neighsi= rangesearch(xyzcoords,xyzcoords, rEps);
     
            if numNodes>0
                 for iNd=1:length(neighsi)
@@ -127,7 +158,7 @@ for iAID=1:length(AIDIdx)
         edges=sort(edges, 2);
         [edgesUnique,~,~]=unique(edges, 'rows', 'stable');
 
-        edgeDist02=zcoords(edgesUnique(:,2), :)-zcoords(edgesUnique(:,1), :);
+        edgeDist02=xyzcoords(edgesUnique(:,2), :)-xyzcoords(edgesUnique(:,1), :);
         edgeDist02=edgeDist02.^2;
         edgeDist02=sum(edgeDist02,2);
         Weigths=exp(-edgeDist02/mean(sqrt(edgeDist02))^2);     
@@ -138,19 +169,18 @@ for iAID=1:length(AIDIdx)
         edgesUniqueTotal{iABID}=edgesUnique+numcellsTotal;
         numcellsTotal=numcellsTotal+numcells;
         TCib{iBID}=T2;
-        xshift=xshift+2.2*max(abs(xcoordsTotal{iABID}));
+        xshift=xshift+2.2*max(abs(coordsTotal{iABID}(:, 1)));
 
 
     end
-    yshift=yshift+2.2*max(abs(ycoordsTotal{iABID}));
+    yshift=yshift+2.2*max(abs(coordsTotal{iABID}(:, 2)));
 
     TCia{iAID} = vertcat(TCib{:});
     nearNeighsia{iAID}=vertcat(nearNeighsib{:});
 end
 
 
-xcoordsTotal=vertcat(xcoordsTotal{:});
-ycoordsTotal=vertcat(ycoordsTotal{:});
+coordsTotal=vertcat(coordsTotal{:});
 nodeTypeVecTotal=vertcat(nodeTypeVecTotal{:});
 cellSectionVecTotal=vertcat(cellSectionVecTotal{:});
 
@@ -158,20 +188,25 @@ edgesUniqueTotal=vertcat(edgesUniqueTotal{:});
 
 TOut=vertcat(TCia{:});
 
-TOut.Centroid_X=xcoordsTotal;
-TOut.Centroid_Y=ycoordsTotal;
+TOut.Centroid_X=coordsTotal(:, 1);
+TOut.Centroid_Y=coordsTotal(:, 2);
 
+if haveZ
+    TOut.Centroid_Z=coordsTotal(:, 3);
+end
+    
 
 nodeTypeVec=nodeTypeVecTotal;
 Weigths=ones(size(edgesUniqueTotal, 1),1);
 
 
-nearNeighs=vertcat(nearNeighsia{:});
+% nearNeighs=vertcat(nearNeighsia{:});
+nearNeighs=[];
 
 G=graph(edgesUniqueTotal(:,1),edgesUniqueTotal(:,2), Weigths);
 
 G.Nodes.label=[nodeTypeVec, cellSectionVecTotal];
-G.Nodes.Coordinates=([xcoordsTotal, ycoordsTotal]);
+G.Nodes.Coordinates=coordsTotal;
 if ~isempty(nearNeighs)
     G.Nodes.nearNeighs=nearNeighs;
 end

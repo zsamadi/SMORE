@@ -17,8 +17,8 @@ arguments
     options.NEVAL=25;
     options.NREF=4;
     options.prior=0.01;
-    options.REFPrior=0.1;
-    options.ENRCHPrior=0.1;
+    options.REFPrior=0.01;
+    options.ENRCHPrior=0.01;
     options.wMin=3;
     options.wMax=3;
     options.MinSeedWidth=3;
