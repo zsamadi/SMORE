@@ -1,5 +1,5 @@
 
-function [G,gStruct, TOut, nodeTypeVecU]=creatAGraph(filename, options)
+function [G,gStruct, TOut, nodeTypeVecU, haveZ]=creatAGraph(filename, options)
 
 T = readtable(filename);
 
@@ -119,8 +119,8 @@ for iAID=1:length(AIDIdx)
             else
                 numNeighs=2;
                 [~, D] = knnsearch(xyzcoords,xyzcoords, 'K',numNeighs);
-                DS=sort(D(:));
-                rEps=DS(end-10);
+               
+                rEps=4*mean(D(D>0));
             end
             nearNeighs = rangesearch(xyzcoords,xyzcoords, rEps);
             edges=cell(length(nearNeighs),1);

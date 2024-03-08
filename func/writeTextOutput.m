@@ -17,7 +17,7 @@ starLine=strcat(starLine, '\n');
 fprintf(fileID,starLine);
 fprintf(fileID,'SMORE: Spatial Motif Recognition\n');
 fprintf(fileID,starLine);
-fprintf(fileID,'version 1.1.0 (Release date: Wed March 6 14:18:26 2024 -0700)\n');
+fprintf(fileID,'version 1.1.0 (Release date: Wed March 6 14:18:26 2024)\n');
 fprintf(fileID,starLine);
 fprintf(fileID,'\n');
 

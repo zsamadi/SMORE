@@ -3,44 +3,49 @@ function smore(dataFolder , options)
 arguments
     dataFolder.input='sampleDataEb.csv';
     dataFolder.output='output';
-    options.alphabet=[];
+    options.nMotifs=5;
+    options.WMotif=4;
+    options.ND=0;
+    options.gMode='delaunay';
+    options.nNeighs=5;
+    options.rEps=0;
+    options.samplingFreq=1;
+    options.shuffleMode='shuffle';
+    options.fixedTypes=0;
+    options.neighDepth=4;
+    options.nTrain=10;
+    options.nScore=10;
+    options.isEnrich=true;
+    options.diffMotif=false;
     options.nEval=25;
     options.nRefine=4;
-    options.WMotif=4;
     options.nRefineIter=20;
-    options.threshold=0.005;
-    options.patience=3;
-    options.nMotifs=5;
-    options.isErzHOut=true;
-    options.nScore=1;
-    options.nTrain=50;
-    options.fixedTypes=0;
-    options.diffMotif=false;
-    options.shuffleMode='shuffle';
-    options.isEnrich=true;
-    options.samplingFreq=1;
-    options.gMode='delaunay';
-    options.numNeighs=5;
-    options.rEps=0;
-    options.neighDepth=4;
-    options.ND=0;
+    options.doGEA=true;
+    options.gePvalMin=5e-2;
+    options.geRandTest=false;
 
 end
+
+rng(1650);
+
+
 clc
 
 LogicalStr = {'false', 'true'};
 
-commandText=sprintf(['smore(input="%s",...\n output="%s",... \n fixedTypes=%d,... \n  nEval=%d,... \n nRefine=%d ,... \n WMotif=%d,... \n ', ...
-                   'nRefineIter=%d,...\n nmotifs=%d,... \n nScore=%d,... \n  nTrain=%d,...\n ', ...
-                   'diffMotif=%s,...\n shuffleMode="%s",...\n isEnrich=%s,... \n samplingFreq=%1.2f,...\n gMode="%s",... \n numNeighs=%d,... ', ...
-                   '\n rEps=%d,... \n neighDepth=%d)'], dataFolder.input,dataFolder.output,options.fixedTypes,options.nEval,options.nRefine, ...
-                   options.WMotif,options.nRefineIter,options.nMotifs,options.nScore, ...
-                   options.nTrain,LogicalStr{options.diffMotif+1}, options.shuffleMode,LogicalStr{options.isEnrich+1},options.samplingFreq, ...
-                   options.gMode,options.numNeighs,options.rEps,options.neighDepth);
+commandText=sprintf(['smore(input="%s",...\n output="%s",...\n nMotifs=%d,... \n WMotif=%d,' ...
+    ['...\n ND=%d,...\n gMode="%s",...\n nNeighs=%d,...\n rEps=%d,...\n samplingFreq=%1.2f,' ...
+    '...\n shuffleMode="%s",...\n fixedTypes=%d,...\n neighDepth=%d,...\n nScore=%d,...\n nTrain=%d,' ...
+    '...\n diffMotif=%s,...\n isEnrich=%s,...\n nEval=%d,...\n nRefine=%d ,...\n '], ...
+                   'nRefineIter=%d,...\n doGEA=%s,...\n gePvalMin=%1.3f,...\n geRandTest=%s) '], dataFolder.input,dataFolder.output,options.nMotifs, ...
+                   options.WMotif,options.ND,options.gMode,options.nNeighs,options.rEps, ...
+                   options.samplingFreq, options.shuffleMode,options.fixedTypes,options.neighDepth, ...
+                   options.nScore, options.nTrain,LogicalStr{options.diffMotif+1},LogicalStr{options.isEnrich+1}, ...
+                   options.nEval,options.nRefine, options.nRefineIter,LogicalStr{options.doGEA+1},options.gePvalMin,LogicalStr{options.geRandTest+1});
 
 
 
-statOut=sprintf('smore started with shuffling method "%s" and numFixedTypes "%d" \n', options.shuffleMode, options.fixedTypes);
+statOut=sprintf('Smore started with shuffling method "%s" and FixedTypes "%s" \n', options.shuffleMode, num2str(options.fixedTypes));
 
 fprintf(statOut);
 
@@ -115,19 +120,20 @@ cgOptions.xyNoiseStd=0;
 shuffleMode=options.shuffleMode;
 fixedTypes=options.fixedTypes;
 
-% close all
-% if length(findall(0))>1
-%     delete(findall(0));
-% end
-
-cgOptions.numNeighs=options.numNeighs;
+cgOptions.nNeighs=options.nNeighs;
 cgOptions.ND=options.ND;
-[G,gStruct,~, nodeTypes]=creatAGraph(folderName,cgOptions);
+[G,gStruct,cellTable, nodeTypes, haveZ]=creatAGraph(folderName,cgOptions);
+
+
+if haveZ
+    geOptions.gStart=6;
+    gHLoptions.is3D=true;
+else
+    geOptions.gStart=5;
+    gHLoptions.is3D=false;
+end
 
 trNumShuffle=trNumShuffleo;
-
-
-% outputFolderName=strcat(outputFolderName0, '\');
 
 if ~exist(outputFolderName, 'dir')
     mkdir(outputFolderName)
@@ -145,17 +151,14 @@ shConfig.xyCoordinates=xyCoordinates;
 
 gHLoptions.isPlotEdges=false;
 
-if isempty(options.alphabet)
-    cTypeChars = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', char((198:198+length(nodeTypes)-53))];
-    cellTypesOne=cTypeChars(1:length(nodeTypes));
-else
-    cellTypesOne=options.alphabet;
-end
+cTypeChars = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', char((198:198+length(nodeTypes)-53))];
+cellTypesOne=cTypeChars(1:length(nodeTypes));
+
 alphabet=cellTypesOne;
 cellTypesOne=string(cellTypesOne(:));
 
 
-gHLoptions.is3D=false;
+
 gHLoptions.ctAnnot=cellTypesOne;
 
 
@@ -173,6 +176,9 @@ end
 
 %% Sample Paths from the Graph, Rand_ESU, or Random Walk
 
+statOut=sprintf('Sampling input graph with %d nodes and %d edges, with sampling frequency %1.2f\n',length(gStruct.labels(:, 1)),length(G.Edges.EndNodes),options.samplingFreq);
+fprintf(statOut);
+
 pathLength=W;
 samPro=options.samplingFreq;
 
@@ -181,12 +187,27 @@ enOptions.pdv=[ones(1,pathLength-1), samPro];
 enOptions.k=pathLength;
 enOptions.isChRadial=true;
 
+if W>2
+    [pathList, ~, nodeSections, pathWeights]=URPEN(gStruct,enOptions);
+else
+    pathList=G.Edges.EndNodes;
+    nodeSections=gStruct.labels(pathList(:, 1), 2);
+    pathWeights=G.Edges.Weight;
+    pathList=num2cell(pathList, 2);
 
-[pathList, ~, nodeSections, pathWeights]=URPEN(gStruct,enOptions);
+end
+
+statOut=sprintf('Generated %d samples of length %d \n',length(pathList),options.WMotif);
+fprintf(statOut);
+
 
 %%
 
+
+
 if strcmpi(options.shuffleMode, 'kernel')
+    statOut='Generate kernels for kernel shuffling methd \n';
+    fprintf(statOut);
     shConfig.nearNeighs=cell(length(gStruct), 1);    
     pathListAll=vertcat(pathList{:});    
     neighDepth=options.neighDepth;    
@@ -245,7 +266,6 @@ xlabel('cell type')
 ylabel('frequency')
 text(cPTypesU-0.5, PWMT+0.001, cellTypesOne)
 title('Primary background')
-% figname=strcat(outputFolderName,'PrimaryBg', fignamExtnd);
 
 PWMTNK=sum(cNTypes(:)==cPTypesU);
 PWMTNK=PWMTNK/sum(PWMTNK);
@@ -255,14 +275,14 @@ grid on
 xlabel('cell type')
 ylabel('frequency')
 text(cPTypesU-0.5, PWMT+0.001, cellTypesOne)
-title('kernel shuffled background')
+title('shuffled background')
 
-figname=strcat(outputFolderName,'kernelShfBg', fignamExtnd);
+figname=strcat(outputFolderName,'primShuffleBg', fignamExtnd);
 
 saveas(gcf,figname)
 
 
-%% Generate Shuffled data with k-mers presereved
+%% Generate Shuffled data
 
 timerValue=tic;
 gOptions.hFrac=0;
@@ -290,9 +310,9 @@ indSeedMode=false;
 isUBack=false;
 
 [extMotif,textOut, ~, background]=mtSmore(cPTypes=cPTypes0, cNTypes=cNTypes0,cPHTypes=cPTypes,cNHTypes=cNTypes(1:length(cPTypes)),pSeq=posSeq, ...
-    posWeight=posWeight, negWeight=negWeight, rvp=gOptions.rvp, mkvOrder=gOptions.mkvOrder, wMin=W, wMax=W,threshold=options.threshold, nmotifs=options.nMotifs,alphabet=alphabet, ...
+    posWeight=posWeight, negWeight=negWeight, rvp=gOptions.rvp, mkvOrder=gOptions.mkvOrder, wMin=W, wMax=W,threshold=0.005, nmotifs=options.nMotifs,alphabet=alphabet, ...
     isEraseNodes=isEraseNodes,fixedTypes=fixedTypes,shConfig=shConfig,shuffleMode=shuffleModeGMaps,  nRefIter=options.nRefineIter, isUBack=isUBack, trNumShuffle=trNumShuffle, diffMotif=options.diffMotif, indSeedMode=indSeedMode,...
-    gTrainNum=options.nTrain, isEnrich=options.isEnrich, scIterMax=options.nScore, patience=options.patience,NREF=options.nRefine, NEVAL=options.nEval);
+    gTrainNum=options.nTrain, isEnrich=options.isEnrich, scIterMax=options.nScore, patience=3,NREF=options.nRefine, NEVAL=options.nEval);
 elapsedTime=toc(timerValue);
 
 %%  resolve motif nodes
@@ -348,12 +368,13 @@ writeTextOutput(filename, extMotif,bkg,  textOut,commandText, elapsedTime, alpha
 numExtMotifs=length(extMotif);
 
 ProfDateNum=datetime("now");
-numFixedTypes=length(fixedTypes);
+numFixedTypes=sum(fixedTypes>0);
 
-statOut=sprintf('shuffling method %s and numFixedTypes %d finished at : %s\n', shuffleMode, numFixedTypes, ProfDateNum);
+statOut=sprintf('Shuffling method "%s" and numFixedTypes %d finished at : %s\n', shuffleMode, numFixedTypes, ProfDateNum);
 fprintf(statOut)
 
-
+statOut=sprintf('Seqlogo and motif highlights are saved in "%s" \n', string(outputFolderName));
+fprintf(statOut)
 %% Seqlogo
 
 cTypeChars=alphabet;
@@ -454,11 +475,6 @@ end
 
 
 
-
-% saveFileName=strcat(outputFolderName,'matData', filenamExtnd);
-% save(saveFileName, '-regexp', '^(?!(extMotifC|hfig|lengthList|listLength|lengthListR|listLengthR|nodeListR|nodeSectionsR|nHoldSeq|negSeq|pHoldSeq|posSeq|seqData)$).')
-
-
 %% Highlight Intersections
 
 
@@ -532,6 +548,26 @@ for iMG=1:numExtMotifs
 
     saveas(gcf,figname)
 
+end
+
+if options.doGEA 
+
+    statOut='Starting gene expression analysis \n';
+    fprintf(statOut)
+    geOptions.isPlotPDF=true;
+    geOptions.isAddNoise=false;
+    geOptions.pvalAllHMapMin=options.gePvalMin;
+    geOptions.outputFolderName=strcat(outputFolderName, 'genEx\');
+    geOptions.isTwoSided=true; 
+    geOptions.isRndTest=options.geRandTest;
+    geOptions.W=W;
+    
+    
+    if ~exist(geOptions.outputFolderName, 'dir')
+         mkdir(geOptions.outputFolderName)        
+    end
+    
+    genExAnalysis(cellTable,ppHMNodesCell, geOptions)
 end
 
 
