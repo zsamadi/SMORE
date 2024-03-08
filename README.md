@@ -47,7 +47,7 @@ geRandTest  |Rand test for gene expression analysis, useful for finding threshol
 You can use following command to modify all possible smore options: 
 
 
-`smore(input='sampleDataEb.csv', output='output', WMotif=4, nMotifs=5, fixedTypes=0, nTrain=50, nScore=1, shuffleMode='shuffle', samplingFreq=1.0, gMode='delaunay', nNeighs=5, rEps=0, neighDepth=4, isEnrich=true, diffMotif=false, nEval=25, nRefine=4, nRefineIter=20, doGEA=true,gePvalMin=0.05, geRandTest=false)`
+`smore(input='sampleDataEb.csv', output='output', WMotif=4, nMotifs=5, fixedTypes=0, nTrain=10, nScore=10, shuffleMode='shuffle', samplingFreq=1.0, gMode='delaunay', nNeighs=5, rEps=0, neighDepth=4, isEnrich=true, diffMotif=false, nEval=25, nRefine=4, nRefineIter=20, doGEA=true,gePvalMin=0.05, geRandTest=false)`
 
 
 [func](https://github.com/zsamadi/SMORE/tree/main/func)
