@@ -373,7 +373,7 @@ numFixedTypes=sum(fixedTypes>0);
 statOut=sprintf('Shuffling method "%s" and numFixedTypes %d finished at : %s\n', shuffleMode, numFixedTypes, ProfDateNum);
 fprintf(statOut)
 
-statOut=sprintf('Seqlogo and motif highlights are saved in "%s" \n', string(outputFolderName));
+statOut=sprintf('logos and motif highlights are saved in "%s" \n', string(outputFolderName));
 fprintf(statOut)
 %% Seqlogo
 
