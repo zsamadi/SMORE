@@ -38,11 +38,16 @@ diffMotif |differential enrichment (options: true, false)  | false
 nEval | number of seeds from initial evaluation | 25
 nRefine |  number of seeds from initial refinement  | 4
 nRefineIter |maximum number of iterations for enrichment | 20
+__Gene expression analysis__
+doGEA  |switch to perform gene expression analysis (options: true, false)  | true
+gePvalMin  | Minimum pvalue for selected heatmap plots of gene expression  | 0.05
+geRandTest  |Rand test for gene expression analysis, useful for finding threshold for significant cases (options: true, false)  | false
 
-you can use following command to modify smore options. 
+
+You can use following command to modify all possible smore options: 
 
 
-`smore(input='sampleDataEb.csv', output='output', WMotif=4, nMotifs=5, fixedTypes=0, nTrain=50, nScore=1, shuffleMode='shuffle', samplingFreq=1.0, gMode='delaunay', nNeighs=5, rEps=0, neighDepth=4, isEnrich=true, diffMotif=false, nEval=25, nRefine=4, nRefineIter=20)`
+`smore(input='sampleDataEb.csv', output='output', WMotif=4, nMotifs=5, fixedTypes=0, nTrain=10, nScore=10, shuffleMode='shuffle', samplingFreq=1.0, gMode='delaunay', nNeighs=5, rEps=0, neighDepth=4, isEnrich=true, diffMotif=false, nEval=25, nRefine=4, nRefineIter=20, doGEA=true,gePvalMin=0.05, geRandTest=false)`
 
 
 [func](https://github.com/zsamadi/SMORE/tree/main/func)
@@ -52,6 +57,15 @@ Contains related functions for running smore. This folder should be at the same 
 [output](https://github.com/zsamadi/SMORE/tree/main/output)
 
 Default folder for saving the output results. The folder currently contains output results of running the algorithm on the default input of "sampleDataEb.csv" file. 
+
+## Need Help?
+Please send questions or possible issues with running the code on your data to zainsamadi@ucla.edu. 
+
+Detailed description for the algorithm is provided in:
+
+Samadi Z., Askary A.,
+"Spatial motifs reveal patterns in cellular architecture of complex tissues",
+BioRxiv, Mar. 2024.
 
 
 
