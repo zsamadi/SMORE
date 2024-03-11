@@ -58,12 +58,10 @@ Contains related functions for running smore. This folder should be at the same 
 
 Default folder for saving the output results. The folder currently contains output results of running the algorithm on the default input of "sampleDataEb.csv" file. 
 
-__GraphWithTypes.jpg and GraphWithShuffleTypes.jpg__: Tissue sections with nodes highlighted with their type in original dataset and the control data generated from the shuffling method. 
-__mLogoi_X_Y_Z_W__: Sequence logo for the output motif i and consensus seed XYZW. 
 
 
 
-## Need Help?
+## Questions
 Please send questions or possible issues with running the code on your data to zainsamadi@ucla.edu. 
 
 Detailed description for the algorithm is provided in:
