@@ -4,10 +4,10 @@ Spatial Motif Recognition
 [data](https://github.com/zsamadi/SMORE/tree/main/data)
 
 A sample input data table with 7 fields, 
-1. NID: node ID, which is the animal ID or section ID in case of the cells being from multiples different tissues. This sample dataset has to IDs.
-2. nodeType: cell type or cluster ID, this sample dataset has 12 cell types.
-3. Centroid_X, Centroid_Y: spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
-4. gene_i: the expression for genes. gene names are arbitrary as long as they're on the columns after spatial coordinates. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
+1. NID: Node ID, which is the animal ID or section ID in case of the cells being from multiples different tissues. This sample dataset has two IDs.
+2. nodeType: Cell type or cluster ID, this sample dataset has 12 cell types.
+3. Centroid_X, Centroid_Y: Spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
+4. gene_i: The expression for genes. gene names are arbitrary as long as they're on the columns after spatial coordinates. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
    
 [run](https://github.com/zsamadi/SMORE/tree/main/run)
 
@@ -44,7 +44,7 @@ gePvalMin  | Minimum pvalue for selected heatmap plots of gene expression  | 0.0
 geRandTest  |Rand test for gene expression analysis, useful for finding threshold for significant cases (options: true, false)  | false
 
 
-You can use following command to modify all possible smore options: 
+You can use the following command to modify all possible smore options: 
 
 
 `smore(input='sampleDataEb.csv', output='output', WMotif=4, nMotifs=5, fixedTypes=0, nTrain=10, nScore=10, shuffleMode='shuffle', samplingFreq=1.0, gMode='delaunay', nNeighs=5, rEps=0, neighDepth=4, isEnrich=true, diffMotif=false, nEval=25, nRefine=4, nRefineIter=20, doGEA=true,gePvalMin=0.05, geRandTest=false)`
