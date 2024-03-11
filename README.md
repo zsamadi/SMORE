@@ -62,7 +62,7 @@ Default folder for saving the output results. The folder currently contains outp
 
 
 ## Questions
-Please send questions or possible issues with running the code on your data to zainsamadi@ucla.edu. 
+Please send questions or possible issues with running the code on your data to zainsamadi at ucla.edu. 
 
 Detailed description for the algorithm is provided in:
 
