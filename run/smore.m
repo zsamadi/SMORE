@@ -412,9 +412,9 @@ plot(pvalueVec, '-kv', 'LineWidth',1)
 grid on
 
 xlabel('motif index')
-ylabel('evalue')
+ylabel('pvalue')
 
-figname=strcat(outputFolderName,'evalueWG', num2str(W), fignamExtnd);
+figname=strcat(outputFolderName,'pvalueW', num2str(W), fignamExtnd);
 saveas(gcf,figname)
 
 
