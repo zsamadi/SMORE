@@ -21,7 +21,7 @@ __Create Graph__
 gMode | The method for creating the graph(options: 'delaunay', 'knn', 'epsilon') | 'delaunay'
 ND | Spatial dimensionality of the input data, if it's set to 0, it looks for the dimensionality of the data from input file (options:0, 2, 3) | 0
 nNeighs |Number of neighbors for the knn method | 5
-rEps |Epsilon radius for epsilon method of creating the graph| 50
+rEps |Epsilon radius for epsilon method of creating the graph. If it's set to 0, the radius is computed to be 4 times the average distance from the nearest neighbor. | 0
 __Generate Control Data__
 shuffleMode | Shuffling method for creating the control data (options: 'shuffle', 'kernel') | 'shuffle'
 neighDepth | Number of neighbors for kernel shuffling method | 4
@@ -58,8 +58,33 @@ Contains related functions for running smore. This folder should be at the same 
 
 Default folder for saving the output results. The folder currently contains output results of running the algorithm on the default input of "sampleDataEb.csv" file. 
 
+* __GraphWithTypes__ and __GraphWithShuffleTypes__:  The tissue map highlighted with the original cell types and shuffled cell types, respectively. 
 
+* __primShuffleBg__: Backgrounf frequencies for primary and control data. Global shuffling results in the same background frequency. 
 
+* __mLogoi_W_X_Y_Z__: Sequence logo for the motif "i" with consensus seed "WXYZ". 
+
+* __pvaluW4__: Plot of log pvalues of the output motifs. 
+
+* __motifGroupOnGraphiW__: Highlights of the motif "i" of length "W" on the graph tissue. 
+
+* __readme__: The Settings for the current experiment along with the alphabets for the cell types. 
+
+* __out__: Output PWM matrix results along with the seeds that constitute  each motif. 
+
+* __genEx__: The folder that contains gene expression output results. 
+
+* __MTAddr-i-p-c__:  the probability distribution of the delta median with motif dmedian highlighted for the case of (i=motif number, p= position in the motif, c=cell type).
+
+* __volcano__: Volcano plot for log pvalues versus delta median. 
+
+* __geaTable__: table containing gene expression case details, with columns _geneName_: gene name, _motifNumber_: motif number,	_motifPosition_: position in the motif, 	_cellType_: cell type, _pvalue_: log pvalue of the expression difference, _deltaMedian_: delta median,	_motifMedian_: median expression of the cells in the motif, 	_typeMedian_: median expression of the cells of the type, _numCellMotif_: number of cells in the motif, _numCellType_: total number of the cells of the type. 
+
+* __allHeatmap__: Heatmap for all cases. 
+
+* __selectedSortedHeatmap__: Heatmap for selected cases based on the input gePvalMin threshold. 
+
+* __selectedDMedianHeatmap__: Heatmap of delta median values for the selected cases. 
 
 ## Questions
 Please send questions or possible issues with running the code on your data to Zain Samadi (zainsamadi at ucla.edu). 
