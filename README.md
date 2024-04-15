@@ -94,6 +94,8 @@ Please send questions or possible issues with running the code on your data to Z
 
 ## Citing
 Detailed description for the algorithm is provided in:
+
+
 Samadi Z., Askary A.,
 "Spatial motifs reveal patterns in cellular architecture of complex tissues", 
 BioRxiv, April. 2024. [full text](https://www.biorxiv.org/content/10.1101/2024.04.08.588586v1)
