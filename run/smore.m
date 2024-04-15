@@ -362,7 +362,7 @@ end
 bkg.PWM0=background{1};
 bkg.mkvOrder=gOptions.mkvOrder;
 filename=strcat(outputFolderName, 'out.txt');
-writeTextOutput(filename, extMotif,bkg,  textOut,commandText, elapsedTime, alphabet);
+writeTextOutput(filename, extMotif,bkg,  textOut, elapsedTime, alphabet);
 
 
 numExtMotifs=length(extMotif);
@@ -439,7 +439,8 @@ end
 
 readmeFileName=strcat(outputFolderName,'readme.txt');
 rmeConfig.isEraseFixed=false;
-writeReadme(readmeFileName, fixedTypes, rmeConfig);
+rmeConfig.commandText=commandText;
+writeReadme(readmeFileName, rmeConfig);
 
 %% Node Analyze
 

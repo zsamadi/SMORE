@@ -1,4 +1,4 @@
-function done=writeTextOutput(filename, motifsCell,bkg, textIn,commandText, elapsedTime, alphabet)
+function done=writeTextOutput(filename, motifsCell,bkg, textIn, elapsedTime, alphabet)
 
 PWM0=bkg.PWM0;
 
@@ -43,7 +43,7 @@ fprintf(fileID,'Background letter frequencies\n');
 
 for ipw=1:length(PWM0)
 
-fprintf(fileID,'%c:%1.5f,', alphabet(ipw), PWM0(ipw));
+fprintf(fileID,'%s:%1.5f,', alphabet(ipw), PWM0(ipw));
 end
 fprintf(fileID,'\n');
 fprintf(fileID,'\n');
@@ -111,9 +111,6 @@ fprintf(fileID,starLine);
 fprintf(fileID,textIn);
 fprintf(fileID,starLine);
 
-commandText=strcat("COMMAND:    ",commandText, '\n');
-fprintf(fileID,commandText);
-fprintf(fileID,starLine);
 
 pcName = getenv('COMPUTERNAME');
 

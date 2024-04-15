@@ -1,4 +1,4 @@
-function done=writeReadme(filename, fixedTypes, gcConfig)
+function done=writeReadme(filename, gcConfig)
 
 
 
@@ -14,16 +14,11 @@ fprintf(fileID,starLine);
 fprintf(fileID,'MATLAB Smore\n');
 fprintf(fileID,starLine);
 
-fprintf(fileID,'\n');
-fprintf(fileID,'motif length: ');
-fprintf(fileID,'%d ', gcConfig.W);
-fprintf(fileID,'\n');
+fprintf(fileID,starLine);
 
-
-fprintf(fileID,'\n');
-fprintf(fileID,'Fixed cell types: ');
-fprintf(fileID,'%d ', fixedTypes);
-fprintf(fileID,'\n');
+commandText=strcat("COMMAND:    ",gcConfig.commandText, '\n');
+fprintf(fileID,commandText);
+fprintf(fileID,starLine);
 
 
 
