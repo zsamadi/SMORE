@@ -16,7 +16,7 @@
     options.shuffleMode='shuffle';
     options.fixedTypes=0;
     options.neighDepth=4;
-    options.nTrain=10;
+    options.nTrain=50;
     options.nScore=10;
     options.isEnrich=true;
     options.diffMotif=false;
