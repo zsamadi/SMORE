@@ -1,8 +1,8 @@
-function [pValMat, meDeltaMot]= computeGeneDProfile(geneEx, MotInTypes, isTwoSided)
+function [pValMat, meDeltaMot]= computeGeneDProfile(geneEx, MotInTypes, pvalMin)
 
 
 if nargin<3
-    isTwoSided=true;
+    pvalMin=0.5;
 end
 
 
@@ -27,54 +27,26 @@ for iGS=1:size(geneExDS, 2)
 
 
     meDeltaMoti=meDeltaMot(iGS);
-    if meDeltaMoti~=0 && mod(nuMotifCell, 2)==0
-        check=1;
-    end
-
-    if iGS==155
-        check=1;
-    end
     
     geneExDSi=geneExDS(:, iGS);
-    probiRightPositive=getMedCDF(geneExDSi, meDeltaMoti, nuMotifCell);
 
+    probTwo=getLRCDF(geneExDSi,meDeltaMoti,nuMotifCell ,pvalMin);
+    
 
-    probiLeftNegative=getLMedCDF(geneExDSi, -meDeltaMoti, nuMotifCell);
-
-    if isTwoSided
-        probTwo=probiRightPositive+probiLeftNegative;
+    if abs(meDeltaMoti)>0 && probTwo>=0.5
+        probTwoM=getLRCDF(geneExDSi,-meDeltaMoti,nuMotifCell ,pvalMin);
     else
-        probTwo=probiRightPositive;
+        probTwoM=1;
     end
 
 
-    probiLeftPositive=getLMedCDF(geneExDSi, meDeltaMoti, nuMotifCell);
 
-
-    probiRightNegative=getMedCDF(geneExDSi, -meDeltaMoti, nuMotifCell);
-    % probiLeftPrime=getMedCDF(geneExDSi, -meDeltaMoti, nuMotifCell);
-
-    if isTwoSided
-        probTwoM=probiRightNegative+probiLeftPositive;
-    else
-        probTwoM=probiLeftPositive;
-    end
-
-    if abs(log(min(probTwo, probTwoM)))>20
-        check=1;
-    end
 
 
 
     pValMat(iGS)=min(probTwo, probTwoM);
 
-     if abs(log(pValMat(iGS)))>20
-         check=1;
-     end
-
 end
-
-check=1;
 
 
 

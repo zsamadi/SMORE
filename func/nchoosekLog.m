@@ -16,7 +16,7 @@ for in=1:length(n)
 
         nkli=nfact-kfact-nmk;
     else
-        nkli=-30;
+        nkli=-1e15;
     end
     nkl(in)=nkli;
 end

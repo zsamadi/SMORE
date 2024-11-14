@@ -35,8 +35,8 @@ seedsSites=vertcat(seedsSites{:});
 nodes=seedsSites;
 nodes=nodes.';
 nodes=nodes(:);
-if length(nodes)>1e6
-    warning('input data is big:%d in seedEnrichsCount, ZNIC count may take more time\n',length(nodes));
+if length(nodes)>5e6
+    warning('\n input data is large:%d in seedEnrichsCount, ZNIC count may take some time\n',length(nodes));
 end
 
 

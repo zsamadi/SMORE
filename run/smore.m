@@ -1,12 +1,15 @@
-function smore(dataFolder , options)
+% function smore(dataFolder , options)
+% 
+% arguments
 
-arguments
     dataFolder.input='sampleDataEb.csv';
-    dataFolder.output='output';
+    dataFolder.gexFilename='sampleDataEbGEx.csv';
+    dataFolder.gAnotFilename='';
+    dataFolder.output='output/sampleDataEb';
     options.nMotifs=5;
     options.WMotif=4;
     options.ND=0;
-    options.gMode='delaunay';
+    options.gMode='delaunay'; % "delaunay" or "knn", or "epsilon"
     options.nNeighs=5;
     options.rEps=0;
     options.samplingFreq=1;
@@ -22,11 +25,36 @@ arguments
     options.nRefineIter=20;
     options.doGEA=true;
     options.gePvalMin=5e-2;
+    options.iSPGEx=false;
     options.geRandTest=false;
-
-end
+    options.isGEByTissue=false;
+    options.disObvs=false;
+% end
 
 rng(1650);
+
+isRunURPENSmore=true;
+
+cd(fileparts(which(mfilename)));
+cd('..\')
+
+addpath(genpath(pwd))
+
+if isRunURPENSmore
+    outputFolderName=strcat(dataFolder.output, '/');
+    
+    outputFolderName=strcat(outputFolderName, string(datetime('today')), '/');
+    mNodefilename=strcat(outputFolderName, 'ppHMNodesCell.mat');
+
+else
+
+    outputFolderName=dataFolder.output;
+
+    
+
+    mNodefilename=strcat(outputFolderName, 'ppHMNodesCell.mat');
+    load(mNodefilename);
+end
 
 
 clc
@@ -37,7 +65,7 @@ commandText=sprintf(['smore(input="%s",...\n output="%s",...\n nMotifs=%d,... \n
     ['...\n ND=%d,...\n gMode="%s",...\n nNeighs=%d,...\n rEps=%d,...\n samplingFreq=%1.2f,' ...
     '...\n shuffleMode="%s",...\n fixedTypes=%d,...\n neighDepth=%d,...\n nScore=%d,...\n nTrain=%d,' ...
     '...\n diffMotif=%s,...\n isEnrich=%s,...\n nEval=%d,...\n nRefine=%d ,...\n '], ...
-                   'nRefineIter=%d,...\n doGEA=%s,...\n gePvalMin=%1.3f,...\n geRandTest=%s) '], dataFolder.input,dataFolder.output,options.nMotifs, ...
+                   'nRefineIter=%d,...\n doGEA=%s,...\n gePvalMin=%1.3f,...\n geRandTest=%s) '], dataFolder.input,outputFolderName,options.nMotifs, ...
                    options.WMotif,options.ND,options.gMode,options.nNeighs,options.rEps, ...
                    options.samplingFreq, options.shuffleMode,options.fixedTypes,options.neighDepth, ...
                    options.nScore, options.nTrain,LogicalStr{options.diffMotif+1},LogicalStr{options.isEnrich+1}, ...
@@ -49,45 +77,24 @@ statOut=sprintf('Smore started with shuffling method "%s" and FixedTypes "%s" \n
 
 fprintf(statOut);
 
-if strcmpi(options.shuffleMode, 'kernel')
-    options.shuffleMode='kernelPath';
-end
 
-cd(fileparts(which(mfilename)));
-cd('..\')
 
-addpath(genpath(pwd))
 
 isPlotGraph=true;
 
 
-trNumShuffleo=1;
-
-
-%% Hyperparameters
-W=options.WMotif;
-isEraseNodes=true;
-fixedTypes=0;
-
-fixedTypes=fixedTypes(:);
-
 
 %% Creat Graph
-
+W=options.WMotif;
+isEraseNodes=true;
 
 folderName=dataFolder.input;
 cgOptions.isJClusterID=false;
-cgOptions.bregID=12;
 
-cgOptions.ambigRatio=0;
-
-cgOptions.ambigType=13;
 
 cgOptions.isNoiseCTS=true;
-cgOptions.fixedTypes=fixedTypes;
 
 cgOptions.retinaAndSection=[3, 3];
-cgOptions.ORetIDs=40;
 
 cgOptions.plotGraph=false;
 cgOptions.isUniformWeight=true;
@@ -95,17 +102,10 @@ cgOptions.isRandom=false;
 cgOptions.nCTypesRand=12;
 cgOptions.nNodesRand=cgOptions.nCTypesRand*840;
 cgOptions.randCoords=false;
-cgOptions.gMode="delaunay"; % "delaunay" or "knn", or "epsilon"
-
-cgOptions.isNBreg=false;
-cgOptions.isPBreg=true;
-cgOptions.isFemale=true;
-cgOptions.isMale=false;
-cgOptions.isNaive=true;
-cgOptions.isStimu=true;
+cgOptions.gMode=options.gMode; 
+cgOptions.nNeighs=options.nNeighs;
 cgOptions.rEps=options.rEps;
 
-outputFolderName=strcat(dataFolder.output, '\');
 
 
 
@@ -122,22 +122,25 @@ fixedTypes=options.fixedTypes;
 
 cgOptions.nNeighs=options.nNeighs;
 cgOptions.ND=options.ND;
-[G,gStruct,cellTable, nodeTypes, haveZ]=creatAGraph(folderName,cgOptions);
+cgOptions.SIDSel=[];
 
+
+[G,gStruct,cidNOut, ocellTypesOne, haveZ, tissueIDs, TOut]=creatAGraph(folderName,cgOptions);
 
 if haveZ
-    geOptions.gStart=6;
     gHLoptions.is3D=true;
 else
-    geOptions.gStart=5;
     gHLoptions.is3D=false;
 end
 
-trNumShuffle=trNumShuffleo;
+trNumShuffle=1;
+
+
 
 if ~exist(outputFolderName, 'dir')
     mkdir(outputFolderName)
 end
+
 
 
 cPTypes=(G.Nodes.label(:, 1)).';
@@ -149,34 +152,66 @@ shConfig.cSections=cSections;
 shConfig.fixedTypes=fixedTypes;
 shConfig.xyCoordinates=xyCoordinates;
 
+
+cTypeChars = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', char((198:198+length(ocellTypesOne)-53))];
+
+
+[~, ~, jCPU]=unique(cPTypes);
+cCPU=accumarray(jCPU, 1);
+[~, iSCU]=sort(cCPU, 'descend');
+
+alphabet=cTypeChars(1:length(ocellTypesOne));
+alphabet(iSCU)=alphabet;
+
+cellTypesOne=string(ocellTypesOne(:));
+
+%% plot graph
+
+
 gHLoptions.isPlotEdges=false;
-
-cTypeChars = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', char((198:198+length(nodeTypes)-53))];
-cellTypesOne=cTypeChars(1:length(nodeTypes));
-
-alphabet=cellTypesOne;
-cellTypesOne=string(cellTypesOne(:));
-
-
-
 gHLoptions.ctAnnot=cellTypesOne;
+gHLoptions.tissueIDs=tissueIDs;
+
+gHLoptions.iSideView=false;
+gHLoptions.alphabet=alphabet;
+
+
+
+
 
 
 if isPlotGraph
     gHLoptions.folderName=outputFolderName;
     gHLoptions.isShuffled=false;
 
-    plotHLightGraph(G, cPTypes, gHLoptions);
+
+gHLoptions.ncolorL= {'414141';
+'BD9F6D';
+'F6EB14';
+'33D4FF';
+'ED047A';
+'3C419A';
+'86C0C8';
+'8282BE';
+'69BD45';
+'33FFF1'};
+
+gHLoptions.iShowPlot=true;
+
+
+
+    plotHLightGraph(G, G.Nodes.label(:, 1), gHLoptions);
 end
 
 
-
-
+if isRunURPENSmore
 
 
 %% Sample Paths from the Graph, Rand_ESU, or Random Walk
 
 statOut=sprintf('Sampling input graph with %d nodes and %d edges, with sampling frequency %1.2f\n',length(gStruct.labels(:, 1)),length(G.Edges.EndNodes),options.samplingFreq);
+sampleSpecs=sprintf('Sampled input graph with %d nodes and %d edges, with sampling frequency %1.2f\n',length(gStruct.labels(:, 1)),length(G.Edges.EndNodes),options.samplingFreq);
+
 fprintf(statOut);
 
 pathLength=W;
@@ -186,9 +221,13 @@ samPro=options.samplingFreq;
 enOptions.pdv=[ones(1,pathLength-1), samPro];
 enOptions.k=pathLength;
 enOptions.isChRadial=true;
+enOptions.disObvs=options.disObvs;
+URPENTimerValue=tic;
+enOptions.ctypes=cPTypes(:);
+enOptions.seedsAll=[];
 
 if W>2
-    [pathList, ~, nodeSections, pathWeights]=URPEN(gStruct,enOptions);
+    [pathList, ~, nodeSections, pathWeights]=URPENH(gStruct,enOptions);
 else
     pathList=G.Edges.EndNodes;
     nodeSections=gStruct.labels(pathList(:, 1), 2);
@@ -196,12 +235,13 @@ else
     pathList=num2cell(pathList, 2);
 
 end
+URPENElapsedTime=toc(URPENTimerValue);
 
-statOut=sprintf('Generated %d samples of length %d \n',length(pathList),options.WMotif);
-fprintf(statOut);
+statURPENG=sprintf('Generated %d samples of length %d in %d seconds\n',length(pathList),options.WMotif, ceil(URPENElapsedTime));
+fprintf(statURPENG);
 
 
-%%
+%% Type Shuffling
 
 
 
@@ -235,7 +275,7 @@ else
     shConfig.nearNeighs=[];
 end
 
-%% Type Shuffling
+
 shConfig.partitionInd=[];
 shConfig.fixedNodes=[];
 shConfig.shuffleMode=shuffleMode;
@@ -244,17 +284,18 @@ shConfig.fixedTypes=fixedTypes;
 shConfig.isSectShuffle=true;
 shConfig.numClusters=20;
 shConfig.cSections=cSections;
-shConfig.fixedTypes=fixedTypes;
 shConfig.numClusters=1;
-shConfig.numShuffle=trNumShuffleo;
+shConfig.numShuffle=1;
 cNTypes=getShuffleTypes(cPTypes, shConfig);
 if isPlotGraph
     gHLoptions.folderName=outputFolderName;
     gHLoptions.isShuffled=true;
+    gHLoptions.iShowPlot=false;
+
     plotHLightGraph(G, cNTypes(1:length(cPTypes)), gHLoptions);
 end
 
-cPTypesU=(1:length(cellTypesOne));
+cPTypesU=unique(cPTypes);
 PWMT=sum(cPTypes(:)==(cPTypesU(:)).');
 PWMT=PWMT/sum(PWMT);
 
@@ -264,7 +305,7 @@ bar(cPTypesU, PWMT)
 grid on
 xlabel('cell type')
 ylabel('frequency')
-text(cPTypesU-0.5, PWMT+0.001, cellTypesOne)
+text(cPTypesU-0.5, PWMT+0.001, alphabet(:))
 title('Primary background')
 
 PWMTNK=sum(cNTypes(:)==cPTypesU);
@@ -274,12 +315,13 @@ bar(cPTypesU, PWMTNK)
 grid on
 xlabel('cell type')
 ylabel('frequency')
-text(cPTypesU-0.5, PWMT+0.001, cellTypesOne)
+text(cPTypesU-0.5, PWMT+0.001, alphabet(:))
 title('shuffled background')
 
 figname=strcat(outputFolderName,'primShuffleBg', fignamExtnd);
 
 saveas(gcf,figname)
+close(gcf);
 
 
 %% Generate Shuffled data
@@ -291,13 +333,15 @@ gOptions.rvp=true;
 gOptions.isSectHold=true;
 gOptions.isHExclsv=true;
 gOptions.numNodes=length(cPTypes);
+gOptions.disObvs=options.disObvs;
 nodeSectionsGen=nodeSections;
 nodeSectionsGenu=unique(nodeSectionsGen);
 randiHold=nodeSectionsGenu(randperm(length(nodeSectionsGenu)));
 randiHold=randiHold(1:floor(length(nodeSectionsGenu)/4));
 nodeSectionsGen(ismember(nodeSectionsGen,randiHold))=1;
 gOptions.numGRs=1;
-[posSeq, ~, cPTypes0, posWeight]=generateSeqs(pathList,pathWeights,nodeSectionsGen,cPTypes, gOptions);shuffleModeGMaps=shuffleMode;
+[posSeq, ~, cPTypes0, posWeight]=generateSeqs(pathList,pathWeights,nodeSectionsGen,cPTypes, gOptions);
+shuffleModeGMaps=shuffleMode;
 gOptions.numGRs=trNumShuffle;
 [~, ~, cNTypes0, negWeight]=generateSeqs(pathList,pathWeights,nodeSectionsGen,cNTypes, gOptions);
 delete(gcp('nocreate'))
@@ -316,15 +360,40 @@ isUBack=false;
 elapsedTime=toc(timerValue);
 
 %%  resolve motif nodes
+
+if samPro<1
+    enOptions.pdv=ones(1,pathLength);
+    seedsAll=arrayfun(@(i) extMotif{i}.seedsToPWM, 1:length(extMotif), 'uniformOutput', false);
+    seedsAll=vertcat(seedsAll{:});
+
+    enOptions.pdv=ones(1,pathLength);
+    enOptions.seedsAll=seedsAll;
+    enOptions.ctypes=cPTypes;
+
+    if W>2
+        [pathList, ~, nodeSections, pathWeights]=URPENH(gStruct,enOptions);
+        
+    else
+        pathList=G.Edges.EndNodes;
+        nodeSections=gStruct.labels(pathList(:, 1), 2);
+        pathWeights=G.Edges.Weight;
+        pathList=num2cell(pathList, 2);
+
+    end
+    nodeSectionsGen=nodeSections;
+    nodeSectionsGen(ismember(nodeSectionsGen,randiHold))=1;
+    posSeq=generateSeqs(pathList,pathWeights,nodeSectionsGen,cPTypes, gOptions);
+end
+
 seqData.pSeq=posSeq;
-seqData.nSeq=posSeq;
-seqData.pHSeq=posSeq;
-seqData.nHSeq=posSeq;
+seqData.nSeq=[];
+seqData.pHSeq=[];
+seqData.nHSeq=[];
 seqData.back=background;
 seqData.cPTypes=cPTypes;
-seqData.cNTypes=cNTypes;
-seqData.cPHTypes=cPTypes;
-seqData.cNHTypes=cNTypes;
+seqData.cNTypes=[];
+seqData.cPHTypes=[];
+seqData.cNHTypes=[];
 seqData.rvp=gOptions.rvp;
 erzOptions.isErzNegative=false;
 erzOptions.fixedTypes=fixedTypes;
@@ -361,8 +430,8 @@ end
 
 bkg.PWM0=background{1};
 bkg.mkvOrder=gOptions.mkvOrder;
-filename=strcat(outputFolderName, 'out.txt');
-writeTextOutput(filename, extMotif,bkg,  textOut, elapsedTime, alphabet);
+filename=strcat(outputFolderName, 'outputResults.txt');
+writeTextOutput(filename, extMotif,bkg,  textOut,commandText, elapsedTime, alphabet);
 
 
 numExtMotifs=length(extMotif);
@@ -379,10 +448,13 @@ fprintf(statOut)
 
 cTypeChars=alphabet;
 
+
 for iexMotif=1:numExtMotifs
 
     exMotifi=extMotif{iexMotif};
     exMotifi.background=background;
+
+
 
     [~, hfig] = seqlogoGen(exMotifi, alphabet);
     [~, exMotifi.cSeed]=max(exMotifi.PWM);
@@ -391,6 +463,7 @@ for iexMotif=1:numExtMotifs
 
     figname=strcat(outputFolderName, 'mLogo',num2str(iexMotif), '_',cSeedStr, fignamExtnd);
     saveas(hfig,figname)
+    close(hfig);
 
 end
 
@@ -416,6 +489,7 @@ ylabel('pvalue')
 
 figname=strcat(outputFolderName,'pvalueW', num2str(W), fignamExtnd);
 saveas(gcf,figname)
+close(gcf);
 
 
 
@@ -425,7 +499,9 @@ rmeConfig=cgOptions;
 
 rmeConfig.cTypeChars=cTypeChars;
 
-rmeConfig.cellTypes=cellTypesOne;
+rmeConfig.cellTypes=(1:length(cellTypesOne));
+
+rmeConfig.cellTypesOne=cellTypesOne;
 
 rmeConfig.W=W;
 
@@ -439,138 +515,162 @@ end
 
 readmeFileName=strcat(outputFolderName,'readme.txt');
 rmeConfig.isEraseFixed=false;
-rmeConfig.commandText=commandText;
-writeReadme(readmeFileName, rmeConfig);
+rmeConfig.sampleSpecs=sampleSpecs;
+rmeConfig.statURPENG=statURPENG;
+writeReadme(readmeFileName, fixedTypes, rmeConfig);
 
 %% Node Analyze
 
 
-xcoordsTotal=G.Nodes.Coordinates(:, 1);
-ycoordsTotal=G.Nodes.Coordinates(:, 2);
-pNodesCell=cell(numExtMotifs, 1);
-pHNodesCell=cell(numExtMotifs, 1);
-ppHNodesCell=cell(numExtMotifs, 1);
-ppHNodesUCell=cell(numExtMotifs, 1);
+
 ppHMNodesCell=cell(numExtMotifs, 1);
-numelVec=zeros(numExtMotifs, 1);
 seedsToPWMC=cell(numExtMotifs, 1);
+
 for imt=1:numExtMotifs
     extMotifi=extMotif{imt};
-    pNodesCell{imt}=(extMotifi.pNodes(:)).';
-    pHNodesCell{imt}=(extMotifi.pHNodes(:)).';
 
-    pNodesPPH=[pNodesCell{imt}, pHNodesCell{imt}];
-
-    ppHNodesUCell{imt}=unique(pNodesPPH);
-    numelVec(imt)=numel(ppHNodesUCell{imt});
-    pNodesPPH=repelem(pNodesPPH, 1, ceil(exp(log(numExtMotifs-extMotifi.testPvalue))));
-
-    ppHNodesCell{imt}=pNodesPPH;
 
     ppHMNodesCell{imt}=[extMotifi.pNodes;extMotifi.pHNodes];
 
     seedsToPWMC{imt}=extMotifi.seedsToPWM;
 
+end
 
+save(mNodefilename,'ppHMNodesCell', 'extMotif', 'options');
+
+%% Highlight Motif Nodes
+
+hlConfig.is3D=false;
+hlConfig.W=W;
+
+hlConfig.cTypeChars=cTypeChars;
+
+hlConfig.fignamExtnd=fignamExtnd;
+
+
+highLMNodes(G, ppHMNodesCell,outputFolderName, hlConfig)
+
+if haveZ
+    hlConfig.is3D=true;
+
+    highLMNodes(G, ppHMNodesCell,outputFolderName, hlConfig)
 end
 
 
 
-%% Highlight Intersections
+%% Highlight all motifs 
+hlConfig.is3D=false;
+hlConfig.numHLights=min(10, numExtMotifs);
+hlConfig.ndesPlotIDx=[];
 
+highALMNodes(G, ppHMNodesCell,outputFolderName, hlConfig)
 
-for iMG=1:numExtMotifs
+if haveZ
+    hlConfig.is3D=true;
 
-
-    figure('visible','off');
-
-    h3=plot(G,'XData',xcoordsTotal,'YData',ycoordsTotal);
-
-    motifPaths=ppHMNodesCell{iMG};
-    cMTypes=cPTypes(motifPaths);
-
-    neronFlags=all(cMTypes>14, 2);
-    if any(neronFlags)
-        cMTypes=cMTypes(neronFlags, :);
-    end
-
-
-    [cMTypesU, iu, ju]=unique(cMTypes, 'rows');
-    cCounts=accumarray(ju, 1);
-    [cCounts, ist]=sort(cCounts, 'descend');
-    cMTypesU=cMTypesU(ist, :);
-    cCountsTotal=sum(cCounts);
-    ncolor=[1 0 1;0 1 0;1 0.64 0;1 0 0;0 0 0;0 1 1;rand(length(iu),3)];
-
-
-    cli=ncolor(1, :);
-
-    for iCTU=1:length(iu)
-        cli=ncolor(iCTU, :);
-        seedPaths=motifPaths(ju==ist(iCTU), :);
-        seedPaths=seedPaths(:);
-
-
-        highlight(h3,seedPaths,'NodeColor',cli, 'EdgeColor',cli);
-    end
-
-
-    titleStr=sprintf("motif %d- total Counts %d", iMG, cCountsTotal);
-    for iStr=1:min(length(cCounts), W+1)
-        countStr=sprintf(":%d ", cCounts(iStr));
-        titleStr=strcat(titleStr, countStr);
-    end
-    title(titleStr)
-
-    grid minor
-    sectionU=(1:3);
-    AnimalIDIdx=(1:3);
-
-
-    set(gca,'xtick',(sectionU-1)*15000,'xticklabel',sectionU)
-    set(gca,'ytick',(AnimalIDIdx-1)*10000,'yticklabel',(1:length(AnimalIDIdx)))
-
-
-    xlabel('section')
-    ylabel('Animal\_ID')
-    numLegend=min(6, length(iu));
-    hold on
-    ax=zeros(numLegend, 1);
-
-    for iLg=1:numLegend
-        ax(iLg)=plot(NaN,NaN,'.', 'MarkerFaceColor', ncolor(iLg, :), 'MarkerEdgeColor',  ncolor(iLg, :), 'markersize', 20); %plotting invisible points of desired colors
-    end
-    legendText=cTypeChars(cMTypesU(1:numLegend, :));
-    legend(ax, legendText)
-
-
-
-    figname=strcat(outputFolderName,'motifGroupOnGraph', num2str(iMG),num2str(W), fignamExtnd);
-
-    saveas(gcf,figname)
+    highALMNodes(G, ppHMNodesCell,outputFolderName, hlConfig)
+end
 
 end
+
+
+%% read cellTable
+if options.doGEA
+if options.iSPGEx
+    geNames=importdata(dataFolder.gAnotFilename);
+
+    mCells=length(cidNOut);
+    nGenes=length(geNames);
+
+
+    gexData = h5read(dataFolder.gexFilename, '/X/data');
+    indCols = h5read(dataFolder.gexFilename, '/X/indices');
+    indRPtr = h5read(dataFolder.gexFilename, '/X/indptr');
+
+    indRows=repelem((1:mCells).', indRPtr(2:end)-indRPtr(1:end-1));
+
+
+    gExpression=sparse(indRows, indCols-min(indCols)+1, gexData,mCells, nGenes);
+
+    gExpression=gExpression(cidNOut, :);
+
+
+
+
+else
+
+
+
+    gExpression=readtable(dataFolder.gexFilename);
+    geNames=gExpression.Properties.VariableNames;
+
+
+    if strcmpi(geNames{1}, 'CID')
+        geNames=geNames(2:end);
+        gExpression=gExpression(:, 2:end);
+    end
+
+    gExpression=gExpression(cidNOut, :);
+    gExpression=table2array(gExpression);
+
+
+
+
+
+
+end
+end
+
+
+%% Gene Expression analysis
+
+
+if abs(options.gePvalMin)>1
+    pvalAllHMapMin=exp(-abs(options.gePvalMin));
+else
+    pvalAllHMapMin=options.gePvalMin;
+end
+
+
+
 
 if options.doGEA 
 
+
     statOut='Starting gene expression analysis \n';
     fprintf(statOut)
-    geOptions.isPlotPDF=true;
-    geOptions.isAddNoise=false;
-    geOptions.pvalAllHMapMin=options.gePvalMin;
-    geOptions.outputFolderName=strcat(outputFolderName, 'genEx\');
-    geOptions.isTwoSided=true; 
-    geOptions.isRndTest=options.geRandTest;
-    geOptions.W=W;
-    
-    
-    if ~exist(geOptions.outputFolderName, 'dir')
-         mkdir(geOptions.outputFolderName)        
-    end
-    
-    genExAnalysis(cellTable,ppHMNodesCell, geOptions)
-end
+    geaSpecs.isPlotPDF=false;
+    geaSpecs.isAddNoise=true;
+    geaSpecs.pvalAllHMapMin=pvalAllHMapMin;
+    geaSpecs.outputFolderName=strcat(outputFolderName, 'genEx/');
+    geaSpecs.isTwoSided=true; 
+    geaSpecs.isRndTest=options.geRandTest;
+    geaSpecs.W=W;
+    geaSpecs.geneAnnotes=geNames;
+    geaSpecs.cellType=cPTypes(:);
+    geaSpecs.isGEByTissue=options.isGEByTissue;
 
+    geaSpecs.SID=G.Nodes.label(:, 2);
+    geaSpecs.alphabet=alphabet;
+  
+    if ~exist(geaSpecs.outputFolderName, 'dir')
+         mkdir(geaSpecs.outputFolderName)        
+    end
+    if isRunURPENSmore
+        gexStart=tic;
+    
+        gExResults=genExSPAnalysis(gExpression,ppHMNodesCell, geaSpecs);
+        gextiming=toc(gexStart);
+        save(mNodefilename,'ppHMNodesCell', 'extMotif', 'options', 'gExResults');
+    end
+    %%
+    geaSpecs.pvalHMapMin=100;
+    geaSpecs.dMedHMapMin=1;
+   
+    
+    gExHPlot(gExResults, geaSpecs);
+
+end
 
 
 

@@ -138,6 +138,7 @@ if ~isempty(unqMersFlagsIn)
         ii=iivd(iidn);
 
         cNodes=nodes{ii};
+
         unqMersFlags=getZNICIM(cNodes,  ones(W, 1));
         unqMersFlags=reshape(unqMersFlags, W, []);
         unqMersFlags=sum(unqMersFlags);
@@ -165,8 +166,24 @@ if ~isempty(unqMersFlagsIn)
 else
 
     for ii=1:nNodesU
-
+        % ntfix=nodes{ii}(1:W);
+        % 
+        % isAllFixedType=unqEMers(ii, :)==options.fixedTypes(:);
+        % isAllFixedType=any(isAllFixedType);
+        % 
+        % if all(isAllFixedType(:))
+        %     unqMersFlags=false(length(nodes{ii}), 1);
+        %     unqMersFlags(1)=true;
+        % 
+        % else
+        %     unqMersFlags=getZNICIM(nodes{ii},  ones(W, 1));
+        % end
         unqMersFlags=getZNICIM(nodes{ii},  ones(W, 1));
+        % 
+
+
+
+
         unqMersFlags=reshape(unqMersFlags, W, []);
         unqMersFlags=sum(unqMersFlags);
         unqMersFlags=unqMersFlags.';

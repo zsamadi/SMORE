@@ -37,7 +37,11 @@ PWMS=options.PWMS;
 [pSSitesU, ~, jPSU]=unique(pSSites(:, 1:wMax), 'rows');
 posPWMS=scoreWords(pSSitesU  ,PWMS, options);
 posPWMS=posPWMS(jPSU);
-posFlag=posPWMS>0;
+if options.isEnrich
+    posFlag=posPWMS>0;
+else
+    posFlag=posPWMS>=max(posPWMS);
+end
 
 if any(posFlag)
 
@@ -63,13 +67,23 @@ if any(posFlag)
         nodes=nodesW.';
         nodes=nodes(:);
 
-        if length(nodes)>1e6
-            warning('input data is big:%d in getPSNmers \n',length(nodes));
-        end
+        % if length(nodes)>5e6
+        %     warning('\n input data is large:%d in getPSNmers \n',length(nodes));
+        % end
 
 
         if ~isempty(nodes)
+
+         isAllFixedType=options.cPTypesInit(nodes)==(options.fixedTypes(:)).';
+
+        if all(isAllFixedType(:))
+            iSit=false(length(nodes), 1);
+            iSit(1)=true;
+            % [~, iNDU]=unique(nodes{ii});
+            % unqMersFlags(iNDU)=true;
+        else
             iSit=getZNICIM(nodes,  ones(wMax, 1));
+        end            
             iSit=sum(reshape(iSit, wMax, []));
             iSit=iSit.';
             iSit=iSit>0;

@@ -14,7 +14,10 @@ alphSize=length(alphabet);
 if isUniformBack
     back0=zeros(1, alphSize);
 else
-    back0=sum(seqH(:)==(1:alphSize));
+    back0=zeros(alphSize, 1);
+    for ialph=1:alphSize
+        back0(ialph)=sum(seqH(:)==ialph);
+    end
 end
 
 pseudoFrac=pseudo/alphSize;

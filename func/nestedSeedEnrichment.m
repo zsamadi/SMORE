@@ -60,6 +60,10 @@ while (refIter<=nRefIter)
         pvalue=1;
         refIter0=refIter;
         refIter=nRefIter+1;
+    elseif ~options.isEnrich
+        pvalue=appxPvalues(1);
+        refIter0=1;
+        refIter=nRefIter+1;  
     else
         PWMSTV=appxPWMS;
 

@@ -57,7 +57,16 @@ else
         w=WExtension(end);
         WExtension(end)=[];
         effectProb=pdv(length(VSubgraph)+1);
-        randi=rand;
+         % if length(VSubgraph)==k-1 && all(options.cPTypes(VSubgraph)==options.cPTypes(w))
+         %     randi=1;
+         % else
+         %     randi=rand;
+         % end
+         randi=rand;
+        
+
+
+
         goEhead=randi<effectProb;
         if (goEhead)
             wGoAheadN=w*wGoAhead;

@@ -3,11 +3,12 @@ Spatial Motif Recognition
 
 [data](https://github.com/zsamadi/SMORE/tree/main/data)
 
-A sample input data table with 7 fields, 
-1. NID: Node ID, which is the animal ID or section ID in case of the cells being from multiples different tissues. This sample dataset has two IDs.
-2. nodeType: Cell type or cluster ID, this sample dataset has 12 cell types.
+A sample input data table with 4 fields, 
+1. SID: Section or TIssue ID, which is the animal ID or section ID in case of the cells being from multiples different tissues. This sample dataset has two IDs.
+2. cellType: Cell type or cluster ID, this sample dataset has 12 cell types.
 3. Centroid_X, Centroid_Y: Spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
-4. gene_i: The expression for genes. gene names are arbitrary as long as they're on the columns after spatial coordinates. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
+A sample input gene expression table with 3 fields, 
+4. gene_i: The expression for genes. gene names are arbitrary. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
    
 [run](https://github.com/zsamadi/SMORE/tree/main/run)
 
@@ -16,6 +17,8 @@ Options |Description | Default
 --- | --- | --- 
 __Input\Output__
 input | input file | 'sampleData.csv' 
+gexFilename | input Gene expression file, can be csv file or h5 file in case of sparse input data | 'sampleDataGEx.csv' 
+gAnotFilename| text file containing Gene  names. Only required in case of sparse input gene expression data| '';
 output | output folder | 'output' 
 __Create Graph__
 gMode | The method for creating the graph(options: 'delaunay', 'knn', 'epsilon') | 'delaunay'
@@ -32,7 +35,7 @@ __SMORE Configuration__
 nMotifs |number of output motifs| 5
 fixedTypes |Vector of fixed cell types, if set to 0, no cell type is fixed. Single fixed cell types can be entered as integers. For example,  fixedTypes=1 is equivalent to cell type 1 being fixed. fixedTypes=[1, 3] implies that cell types 1 and 3 are fixed | 0
 nTrain | number of control data generated for training | 50
-nScore |number of control data generated for scoring | 1
+nScore |number of control data generated for scoring | 10
 isEnrich | Switch for performing enrichment or not (options: true, false) | true
 diffMotif |differential enrichment (options: true, false)  | false 
 nEval | number of seeds from initial evaluation | 25
@@ -40,6 +43,8 @@ nRefine |  number of seeds from initial refinement  | 4
 nRefineIter |maximum number of iterations for enrichment | 20
 __Gene expression analysis__
 doGEA  |switch to perform gene expression analysis (options: true, false)  | true
+iSPGEx | sparse gene expression input data (options: true, false)  | false
+isGEByTissue | perform gene expression for each SID separately (options: true, false)  | false
 gePvalMin  | Minimum pvalue for selected heatmap plots of gene expression  | 0.05
 geRandTest  |Rand test for gene expression analysis, useful for finding threshold for significant cases (options: true, false)  | false
 
@@ -73,7 +78,7 @@ Default folder for saving the output results. The folder currently contains outp
 
 * __readme__: The Settings for the current experiment along with the alphabets for the cell types. 
 
-* __out__: Output PWM matrix results along with the seeds that constitute  each motif. 
+* __outputResults__: Output PWM matrix results along with the seeds that constitute  each motif. 
 
 * __genEx__: The folder that contains gene expression output results. 
 

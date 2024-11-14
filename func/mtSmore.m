@@ -176,6 +176,19 @@ while(isEraseOccured && numPateince<options.patience)
         if ~isempty(seedsWmax{end}.seeds)
 
             [seedsNEVAL, seedsWmax]=evaluateInitialSeeds(seedsWmax, options);
+            if wMax==2 && iErase==1
+                heatMap2=zeros(length(options.alphabet));
+                heatMap2(sub2ind(size(heatMap2),seedsWmax.seeds(:,1),seedsWmax.seeds(:,2)))=seedsWmax.pvalues;
+                figure('Visible','on')
+                heatmap(abs(heatMap2), 'CellLabelColor','none')
+                colormap(parula)
+                clim([0, quantile(abs(heatMap2(:)), 0.98)])
+            end
+
+                
+
+
+
 
             elapsedTime=toc(ticEV);
             fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);

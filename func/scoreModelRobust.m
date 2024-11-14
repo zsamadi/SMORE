@@ -113,11 +113,15 @@ if ~isempty(seedsEnriched.seeds)
         [pvalReg, istReg]=sort(pvalReg);
         pvalSpecReg=pvalSpecReg(istReg, :);
         nSeedsInPWMReg=nSeedsInPWMReg(istReg);
+        if options.scIterMax>=10
+            perceID=floor(0.95*options.scIterMax);
+            perceID=max(perceID, 1);
+        else
+            perceID=options.scIterMax;
+        end
 
-        perceID=floor(0.95*options.scIterMax);
-        perceID=max(perceID, 1);
-
-        outMotif.testPvalue=max(pvalReg(perceID), seedsEnriched.pvalues(1));
+        % outMotif.testPvalue=max(pvalReg(perceID), seedsEnriched.pvalues(1));
+        outMotif.testPvalue=pvalReg(perceID);
         nSeedsInPWM=nSeedsInPWMReg{perceID};
         pvalSpecs=pvalSpecReg(perceID, :);
 
