@@ -7,8 +7,9 @@ A sample input data table with 4 fields,
 1. SID: Section or TIssue ID, which is the animal ID or section ID in case of the cells being from multiples different tissues. This sample dataset has two IDs.
 2. cellType: Cell type or cluster ID, this sample dataset has 12 cell types.
 3. Centroid_X, Centroid_Y: Spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
+
 A sample input gene expression table with 3 fields, 
-4. gene_i: The expression for genes. gene names are arbitrary. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
+1. gene_i: The expression for genes. gene names are arbitrary. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
    
 [run](https://github.com/zsamadi/SMORE/tree/main/run)
 
