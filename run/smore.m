@@ -1,6 +1,6 @@
-% function smore(dataFolder , options)
-% 
-% arguments
+function smore(dataFolder , options)
+
+arguments
 
     dataFolder.input='sampleDataEb.csv';
     dataFolder.gexFilename='sampleDataEbGEx.csv';
@@ -29,7 +29,7 @@
     options.geRandTest=false;
     options.isGEByTissue=false;
     options.disObvs=false;
-% end
+end
 
 rng(1650);
 
