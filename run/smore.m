@@ -36,7 +36,7 @@ rng(1650);
 isRunURPENSmore=true;
 
 cd(fileparts(which(mfilename)));
-cd('..\')
+cd('../')
 
 addpath(genpath(pwd))
 
