@@ -1,4 +1,4 @@
-function [outMotifCell,textOut,commandText, background, cPTypesOut]= mtSmore(seqData, options)
+function [outMotifCell,textOut,commandText, background, heatMap2]= mtSmore(seqData, options)
 
 
 
@@ -61,6 +61,8 @@ arguments
     options.isUHold=false;
     options.isNormalTest=false;
     options.iSyn=false;
+    options.cellTypesStr=[];
+    options.simBernouli=false;
 
 end
 
@@ -136,7 +138,7 @@ for iShuffle=1:options.gTrainNum
 end
 
 options.cNTypesMat=cNTypesMat;
-
+heatMap2=[];
 fprintf('\n')
 while(isEraseOccured && numPateince<options.patience)
 
@@ -160,8 +162,11 @@ while(isEraseOccured && numPateince<options.patience)
             if options.isNormalTest
                 options.bernoulli=2;
             else
-
-                options.bernoulli=totalScale(1)/sum(totalScale);
+                if options.simBernouli
+                    options.bernoulli=1/(options.gTrainNum+2);
+                else
+                    options.bernoulli=totalScale(1)/sum(totalScale);
+                end
             end
         end
 
@@ -177,62 +182,144 @@ while(isEraseOccured && numPateince<options.patience)
 
             [seedsNEVAL, seedsWmax]=evaluateInitialSeeds(seedsWmax, options);
             if wMax==2 && iErase==1
+
+
+                [pnPv, pnPi]=min([seedsWmax.pvalues, seedsWmax.npvalues], [], 2);
                 heatMap2=zeros(length(options.alphabet));
-                heatMap2(sub2ind(size(heatMap2),seedsWmax.seeds(:,1),seedsWmax.seeds(:,2)))=seedsWmax.pvalues;
-                figure('Visible','on')
-                heatmap(abs(heatMap2), 'CellLabelColor','none')
-                colormap(parula)
-                clim([0, quantile(abs(heatMap2(:)), 0.98)])
+                heatMap2(sub2ind(size(heatMap2),seedsWmax.seeds(:,1),seedsWmax.seeds(:,2)))=-pnPv.^pnPi;
+                f=figure('Visible','on');
+                h=heatmap(heatMap2, 'CellLabelColor','none');
+                colormap(lbmap(256,'BrownBlue'))
+
+                % colormap(parula)
+                clim0=[quantile(heatMap2(:), 0.01),quantile(heatMap2(:), 0.99)];
+                clim0=min(abs(clim0));
+                clim([-clim0, clim0])
+                if ~isempty(options.cellTypesStr)
+                    h.YDisplayLabels=options.cellTypesStr;
+                    h.XDisplayLabels=options.cellTypesStr;
+                end
+                title(h, 'length-2 celltype pair significance heatmap')
+                f.Position(3:4) = f.Position(3:4)*3;
+                f.Position(1:2) = f.Position(1:2)/3;
+
+                % heatMap2S=heatMap2;
+                % heatMap2S(heatMap2S>clim0)=clim0;
+                % heatMap2S(heatMap2S<-clim0)=-clim0;
+
+
+                % cg = clustergram(heatMap2S, 'RowLabels', options.cellTypesStr,...
+                %              'ColumnLabels', options.cellTypesStr,...
+                %              'RowPdist', 'correlation',...
+                %              'ColumnPdist', 'correlation');
+                % cg.Colormap=colormap(lbmap(256,'BrownBlue'));
+
+
+
             end
 
-                
+            if wMax==2
+
+                seeds2=seedsWmax.seeds;
+                seeds2=sort(seeds2, 2);
+
+
+                [~, iUSeed]=unique(seeds2, 'stable', 'rows');
+
+                for iiE0=1:options.nmotifs
+
+                    iE0=iUSeed(iiE0);
 
 
 
 
-            elapsedTime=toc(ticEV);
-            fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
-            fprintf('Refine Initial Seeds   (Motif #%d)... ', iErase);
 
-            ticRI=tic;
-            seedsEnriched=refineInitialSeeds(seedsNEVAL,seedsWmax,seqData, seqDataSpecs, options);
-            elapsedTime=toc(ticRI);
-            fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
-            fprintf('Nested Subset Enrich   (Motif #%d)... ', iErase);
-
-            ticNS=tic;
-            seedsEnriched=nestedSubsetEnrichment(seedsEnriched,seedsWmax,seqData,seqDataSpecs,options);
-            elapsedTime=toc(ticNS);
-            fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
-
-            fprintf('Hold-out Scoring       (Motif #%d)... ', iErase);
-
-            ticHS=tic;
-            outMotif=scoreModelRobust(seedsEnriched, seqData, options);
-            elapsedTime=toc(ticHS);
-            fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
+                    outMotif.testPvalueVec=zeros(options.scIterMax, 1);
+                    outMotif.testPvalueVec(1)=seedsWmax.pvalues(iE0);
+                    outMotif.testPvalue=seedsWmax.pvalues(iE0);
+                    outMotif.pnsCPV=[seedsWmax.counts(iE0, :), seedsWmax.pvalues(iE0)];
+                    outMotif.cSeed=seedsWmax.seeds(iE0, :);
+                    outMotif.scoreThr=0;
+                    outMotif.trainPvalue=seedsWmax.pvalues(iE0);
+                    tmPWM=zeros(length(options.alphabet), 2)+options.prior;
+                    tmPWM(outMotif.cSeed(1), 1)=length(options.alphabet);
+                    tmPWM(outMotif.cSeed(2), 2)=length(options.alphabet);
+                    tmPWM=tmPWM./sum(tmPWM);
 
 
-            fprintf('Erase Found Motif      (Motif #%d)... ', iErase);
-            ticEM=tic;
-            [seqData,~, isEraseOccured]=eraseMotif(outMotif,  seqData, options);
-            elapsedTime=toc(ticEM);
-            fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
-            PWMSE=outMotif.PWMSOut;
-            if options.mkvOrder>0
-                PWM1=2.^(PWMSE);
+
+                    outMotif.PWMSOut=log(tmPWM);
+
+                    outMotif.secSeeds=ones(3, 2);
+                    outMotif.seedsToPWM=outMotif.cSeed;
+                    outMotif.seedsPvalue=seedsWmax.pvalues(iE0);
+                    outMotif.PWM=tmPWM;
+                    outMotif.iErase=iiE0;
+                    outMotifCell{iiE0, iW}=outMotif;
+                end
+                iErase=iiE0;
+
             else
-                PWM1=2.^(PWMSE).*background{1};
+
+
+
+
+
+
+
+
+
+                elapsedTime=toc(ticEV);
+                fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
+
+
+
+
+
+
+
+                fprintf('Refine Initial Seeds   (Motif #%d)... ', iErase);
+
+                ticRI=tic;
+                seedsEnriched=refineInitialSeeds(seedsNEVAL,seedsWmax,seqData, seqDataSpecs, options);
+                elapsedTime=toc(ticRI);
+                fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
+                fprintf('Nested Subset Enrich   (Motif #%d)... ', iErase);
+
+                ticNS=tic;
+                seedsEnriched=nestedSubsetEnrichment(seedsEnriched,seedsWmax,seqData,seqDataSpecs,options);
+                elapsedTime=toc(ticNS);
+                fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
+
+                fprintf('Hold-out Scoring       (Motif #%d)... ', iErase);
+
+                ticHS=tic;
+                outMotif=scoreModelRobust(seedsEnriched, seqData, options);
+                elapsedTime=toc(ticHS);
+                fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
+
+
+                fprintf('Erase Found Motif      (Motif #%d)... ', iErase);
+                ticEM=tic;
+                [seqData,~, isEraseOccured]=eraseMotif(outMotif,  seqData, options);
+                elapsedTime=toc(ticEM);
+                fprintf('Elapsed Time %3.3f seconds \n' , elapsedTime);
+                PWMSE=outMotif.PWMSOut;
+                if options.mkvOrder>0
+                    PWM1=2.^(PWMSE);
+                else
+                    PWM1=2.^(PWMSE).*background{1};
+                end
+
+                outMotif = rmfield(outMotif,'PWMSE');
+
+                outMotif.PWM=PWM1;
+                outMotif.iErase=iErase;
+
+
+                outMotifCell{iErase, iW}=outMotif;
+                testPvalues(iErase, :)=outMotif.testPvalue;
             end
-
-            outMotif = rmfield(outMotif,'PWMSE');
-
-            outMotif.PWM=PWM1;
-            outMotif.iErase=iErase;
-
-
-            outMotifCell{iErase, iW}=outMotif;
-            testPvalues(iErase, :)=outMotif.testPvalue;
 
             if (options.evalue)
                 validThreshold= log(options.threshold)-log(iErase);

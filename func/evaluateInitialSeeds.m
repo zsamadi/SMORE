@@ -48,7 +48,15 @@ else
 end
 
 fisherTest=computePvalue(weightsMat, pvalSpecs, bernoulli);
+weightsMatN=weightsMat(:, end:-1:1);
+
+weightsMatN(weightsMatN==0)=1;
+
+fisherTestN=computePvalue(weightsMatN, pvalSpecs(end:-1:1), 1-bernoulli);
+
 pvaluesWMax=fisherTest(end-merLength(end)+1:end);
+pvaluesNWMax=fisherTestN(end-merLength(end)+1:end);
+
 pvaluesRawOut=pvaluesWMax;
 countsWMax=unqMersCell{end}.counts;
 uniWMersWMax= unqMersCell{end}.seeds;
@@ -56,6 +64,7 @@ uniWMersMWidth= unqMersCell{end}.maxWidth;
 weightsWMax= unqMersCell{end}.weights;
 [pvaluesWMax, idxWmax]=sortrows([pvaluesWMax,-uniWMersMWidth, -weightsWMax(:,1)], 'ascend');
 seedsWmax.pvalues=pvaluesWMax(:, 1);
+seedsWmax.npvalues=pvaluesNWMax(idxWmax);
 seedsWmax.seeds=uniWMersWMax(idxWmax, :);
 seedsWmax.counts=countsWMax(idxWmax, :);
 seedsWmax.weights=weightsWMax(idxWmax, :);

@@ -58,6 +58,7 @@ if ~isempty(geneExpression)
         % 
         %     postLoop=postLoop(:);
         % end
+        % postLoop=postLoop(:);
 
         for iMTPosti=postLoop
             motifPathsFirst=motifPaths(:, iMTPosti);
@@ -75,8 +76,15 @@ if ~isempty(geneExpression)
 
 
                 AMotifPathsi=motifPathsFirst(AMotifPathsTypes==AMotifPathsTypesU(iMType));
+                
 
-                typeNodeIdx=allNodeIdx(cTypes==AMotifPathsTypesU(iMType));
+                if specs.motifVsAll
+                    typeNodeIdx=allNodeIdx;
+                    AMotifPathsAllFlagi=true(length(cTypes),1);
+                else
+                    typeNodeIdx=allNodeIdx(cTypes==AMotifPathsTypesU(iMType));
+                    AMotifPathsAllFlagi=(cTypes==AMotifPathsTypesU(iMType));
+                end
 
                 motifInType=ismember(typeNodeIdx, AMotifPathsi);
 
@@ -97,7 +105,7 @@ if ~isempty(geneExpression)
                     motifInType=motifInType(randperm(length(motifInType)));
                 end
 
-                AMotifPathsAllFlagi=(cTypes==AMotifPathsTypesU(iMType));
+                
                 geneExAlli=geneExpression(AMotifPathsAllFlagi, :);
                 geneExi=geneExAlli(motifInType, :);
                 geneNExi=geneExAlli;
@@ -195,7 +203,7 @@ if ~isempty(geneExpression)
 
                 pvalueMedTheoC{iResult}=pvalueMedTheo(siGenes);
                 foldChangeC{iResult}=foldChange(siGenes);
-                addressC{iResult}=[iMt, iMTPosti, csTypesU(AMotifPathsTypesU(iMType), :)];
+                addressC{iResult}=[iMt, iMTPosti(1), csTypesU(AMotifPathsTypesU(iMType), :)];
 
                 medMotC{iResult}=medMot(siGenes);
 

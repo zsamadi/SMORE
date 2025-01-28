@@ -1,4 +1,6 @@
 function h=plotHLightGraph(G, cellSubtypeVec,options)
+highlightOffset=options.hLOffset;
+numHLight=options.numHLight;
 
 alphabet=options.alphabet(:);
 
@@ -6,6 +8,33 @@ folderName=options.folderName;
 
 xcoordsTotal=G.Nodes.Coordinates(:, 1);
 ycoordsTotal=G.Nodes.Coordinates(:, 2);
+
+% ycoordsTotal=max(ycoordsTotal(:))-ycoordsTotal;
+
+
+% sidS=G.Nodes.label(:, 2);
+
+
+% [sidSU, ~, jsidS]=unique(sidS);
+
+% xShift=11;
+% yShift=6.5;
+
+% xShift=2000;
+% yShift=2000;
+% 
+% 
+% numCols=ceil(sqrt(length(sidSU)));
+
+% for iU=1:length(sidSU)
+%     selectI=jsidS==iU;
+%     xcoordsTotal(selectI)=xcoordsTotal(selectI)-min(xcoordsTotal(selectI))+xShift*(mod(iU-1, numCols));
+%     ycoordsTotal(selectI)=ycoordsTotal(selectI)-min(ycoordsTotal(selectI))+yShift*floor((iU-1)/numCols);
+%         % ycoordsTotal(selectI)=ycoordsTotal(selectI)-min(ycoordsTotal(selectI))+yShift*(mod(iU-1,4));
+% 
+% end
+
+
 
 
 
@@ -27,7 +56,7 @@ cellCnts=accumarray(jU, 1);
 cellSubtypeVecU=cellSubtypeVecU(ist);
 cellSubtypeVecU=cellSubtypeVecU(:);
 
-
+cellSubtypeVecU=cellSubtypeVecU(highlightOffset+1:end);
 
 % for embryo3
 % cellSubtypeVecU(4)=[];
@@ -38,7 +67,7 @@ cellSubtypeVecU=cellSubtypeVecU(:);
 % cellSubtypeVecU(11)=21;
 
 
-numHighlight=min(10, length(cellSubtypeVecU));
+numHighlight=min(numHLight, length(cellSubtypeVecU));
 % nodesColor=nodesAll(ismember(cellSubtypeVec,cellSubtypeVecU(1:numHighlight)));
 % G=subgraph(G, nodesColor);
 % 
@@ -97,6 +126,10 @@ ncolorL=options.ncolorL;
 % '6ECCDD'};
 ncolorL=hex2rgb(ncolorL);
 ncoloro=[ncolorL;ncoloro];
+
+% ncoloro=ncoloro(randperm(size(ncoloro, 1)), :);
+
+
 % for inl=1:1
 %     ncoloro(2, :)=[];
 % end
@@ -109,11 +142,13 @@ plotEdges=options.isPlotEdges;
 % edgeClrStr=["none", "b"];
 % edgeClr=edgeClrStr(double(plotEdges)+1);
 grColor=[0.8,0.8,0.8];
-offOn={'off', 'on'};
-f=figure('Visible',offOn{options.iShowPlot+1});
-    
+% Markers = {'+','o','*','x','v','d','^','s','>','<'};
+% Markers = {'o','d','s'};
+% Markers = {'o','d','s', '<'};
+Markers = {'.'};
 
 if options.is3D
+    f=figure;
 
     if options.iSideView
         ax1=subplot(4, 3, [1,2,4,5,7,8]);
@@ -129,17 +164,20 @@ if options.is3D
         h=plot(ax1,G,'XData',xcoordsTotal,'YData',ycoordsTotal,'ZData',zcoordsTotal,'NodeColor',grColor, 'EdgeColor','none', 'MarkerSize',2);
     end
 else
+    f=figure('Visible','on');
     f.Position(3:4)=f.Position(3:4)*1.5;
     f.Position(1:2)=f.Position(1:2)*0.75;
 
     if plotEdges
-        h=plot(G,'XData',xcoordsTotal,'YData',ycoordsTotal,'NodeColor',grColor, 'EdgeColor',grColor, 'MarkerSize',1);
+        h=plot(G,'XData',xcoordsTotal,'YData',ycoordsTotal,'NodeColor',grColor, 'EdgeColor',grColor, 'MarkerSize',1.5);
     else
-        h=plot(G,'XData',xcoordsTotal,'YData',ycoordsTotal,'NodeColor',grColor, 'EdgeColor','none', 'MarkerSize',1);
+        h=plot(G,'XData',xcoordsTotal,'YData',ycoordsTotal,'NodeColor',grColor, 'EdgeColor','none', 'MarkerSize',1.5);
     end
 
 
 end
+
+% Markers = {'+','o','*','x','v','d','^','s','>','<'};
 
 for iu=1:numHighlight
 
@@ -165,7 +203,7 @@ else
 end
 
 for iu=1:numHighlight
-    ax(iu)=plot(NaN,NaN,'.', 'MarkerFaceColor', ncoloro(iu, :), 'MarkerEdgeColor', ncoloro(iu, :), 'markersize', 20); %plotting invisible points of desired colors
+    ax(iu)=plot(NaN,NaN, '.', 'MarkerFaceColor', ncoloro(iu, :), 'MarkerEdgeColor', ncoloro(iu, :), 'markersize', 20); %plotting invisible points of desired colors
 end
 
 if ~isempty(options.ctAnnot)
@@ -178,7 +216,7 @@ else
 end
 
 if numHighlight<length(cellSubtypeVecU)
-    ax(end)=plot(NaN,NaN,'.', 'MarkerFaceColor', grColor, 'MarkerEdgeColor',grColor, 'markersize', 20); %plotting invisible points of desired colors
+    ax(end)=plot(NaN,NaN, '.', 'MarkerFaceColor', grColor, 'MarkerEdgeColor',grColor, 'markersize', 20); %plotting invisible points of desired colors
     legendText=[legendText;"others"];
 
 end
@@ -187,7 +225,7 @@ end
 numLegColumns=ceil(numHighlight/20);
 
 
-legend(ax,legendText,'NumColumns',numLegColumns, 'Location', 'bestoutside')
+legend(ax,legendText,'NumColumns',numLegColumns, 'Location', 'best')
 
 
 
@@ -198,7 +236,7 @@ if options.isShuffled>0
 
 else
 
-    figname=strcat(folderName, 'GraphWithTypes.jpg');
+    figname=strcat(folderName, 'GraphWithTypes', num2str(highlightOffset), '.jpg');
     titleTex='tissue map';
 
 end
@@ -284,6 +322,8 @@ if ~options.is3D
 elseif ~options.iSideView
     saveas(gcf,figname)
 end
+
+% close(gcf);
 
 % figure
 %

@@ -1,7 +1,7 @@
 function highALMNodes(G, ppHMNodesCell,outputFolderName, config)
 
 
-offsetHL=0;
+offsetHL=config.offsetHL;
 ndesPlotIDx=config.ndesPlotIDx;
 fignamExtnd=config.fignamExtnd;
 
@@ -16,22 +16,22 @@ end
 sidS=G.Nodes.label(:, 2);
 
 
-[sidSU, ~, jsidS]=unique(sidS);
+% [sidSU, ~, jsidS]=unique(sidS);
 
 % xShift=11;
 % yShift=6.5;
-xShift=2000;
-yShift=2000;
+% xShift=2000;
+% yShift=2000;
+% 
+% numCols=ceil(sqrt(length(sidSU)));
 
-numCols=ceil(sqrt(length(sidSU)));
-
-for iU=1:length(sidSU)
-    selectI=jsidS==iU;
-    xcoordsTotal(selectI)=xcoordsTotal(selectI)-min(xcoordsTotal(selectI))+xShift*(mod(iU-1, numCols));
-    ycoordsTotal(selectI)=ycoordsTotal(selectI)-min(ycoordsTotal(selectI))+yShift*floor((iU-1)/numCols);
-        % ycoordsTotal(selectI)=ycoordsTotal(selectI)-min(ycoordsTotal(selectI))+yShift*(mod(iU-1,4));
-
-end
+% for iU=1:length(sidSU)
+%     selectI=jsidS==iU;
+%     xcoordsTotal(selectI)=xcoordsTotal(selectI)-min(xcoordsTotal(selectI))+xShift*(mod(iU-1, numCols));
+%     ycoordsTotal(selectI)=ycoordsTotal(selectI)-min(ycoordsTotal(selectI))+yShift*floor((iU-1)/numCols);
+%         % ycoordsTotal(selectI)=ycoordsTotal(selectI)-min(ycoordsTotal(selectI))+yShift*(mod(iU-1,4));
+% 
+% end
 
     
 
@@ -106,7 +106,7 @@ end
     % legend(ax, legendText, 'location', 'bestoutside', 'NumColumns', 5)
     legend(ax, legendText, 'location', 'bestoutside', 'NumColumns', 1)
 
-    figname=strcat(outputFolderName,'motifsAllOnGraph',num2str(config.is3D), fignamExtnd);
+    figname=strcat(outputFolderName,'motifsAllOnGraph',num2str(offsetHL), fignamExtnd);
 
     saveas(gcf,figname)
 
@@ -122,7 +122,7 @@ end
 %     legend(ax, legendText, 'location', 'bestoutside')
 
     axis equal
-    axis off
+    % axis off
 
 
-    close(gcf);
+    % close(gcf);

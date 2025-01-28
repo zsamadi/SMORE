@@ -1,4 +1,30 @@
 function gExHPlot(gExResults, specs)   
+[~, sorID]=sort(specs.alphabet);
+rankID(sorID)=1:length(sorID);
+
+
+ % save Results
+ % addressC=gExResults.addressC;
+ % 
+ %     addressAll0=vertcat(addressC{:});
+ %     addressObvs=ismember(addressAll0(:, 1), [(1:5).';9]);
+ %     gExResults=structfun(@(x) x(~addressObvs), gExResults, 'UniformOutput', false);
+ %     addressC=gExResults.addressC;
+ % 
+ %     addressAll0=vertcat(addressC{:});
+ % 
+ % 
+ %     addressAll0WOP=addressAll0;
+ %    addressAll0WOP(:, 2)=[];
+ %    [~, aPU]=unique(addressAll0WOP, 'rows');
+ % 
+ %    aa13=addressAll0(:, 1:3);
+ %    [~, ~, aajU]=unique(aa13, 'rows');
+ %    aac=accumarray(aajU, 1);
+ %    aac=aac(aajU);
+ %    aacf=aac>2;
+ %    gExResults=structfun(@(x) x(aacf), gExResults, 'UniformOutput', false);
+
 
 
 
@@ -30,6 +56,12 @@ function gExHPlot(gExResults, specs)
     %% plot volcano
 
     addressAll0=vertcat(addressC{:});
+    % addressAll0(:, 3)=rankID(addressAll0(:, 3));
+
+
+
+
+    % heatmap for all cases, ordered with address
     lengthV=zeros(length(pvalueMedTheoC),1);
 
     for iPV=1:length(pvalueMedTheoC)
@@ -46,6 +78,8 @@ function gExHPlot(gExResults, specs)
     isInfPval=isinf(pvalAllHist);
     pvalAllHist(isInfPval)=ceil(max(pvalAllHist(~isInfPval))+1);
 
+    % [pvalAllHistSort, iHSort]=sort(pvalAllHist);
+
 
     pvalAllTheo=vertcat(pvalueMedTheoC{:});
 
@@ -54,6 +88,10 @@ function gExHPlot(gExResults, specs)
 
     isInfPval=isinf(pvalAllTheo);
     pvalAllTheo(isInfPval)=ceil(max(pvalAllTheo(~isInfPval))+1);
+
+
+
+    % pvalAllFitSort=pvalAllTheo(iHSort);
 
 
     pvalAllFlag=pvalAllTheo>pvalAllTheoMin;
@@ -83,7 +121,7 @@ function gExHPlot(gExResults, specs)
     figName=strcat(outputFolderName, figName, '.jpg');
 
     saveas(gcf,figName);
-    close(gcf);
+    %closegcf);
 
 
 
@@ -173,6 +211,7 @@ function gExHPlot(gExResults, specs)
         heatmapYLabel=strcat(num2str(heatmapYLabel(:, 1)),'-', num2str(heatmapYLabel(:, 2)),'-', num2str(heatmapYLabel(:, 3)));
     end
 
+    % heatmapYLabel=strcat(num2str(heatmapYLabel(:, 1)),'-', num2str(heatmapYLabel(:, 2)),'-', num2str(heatmapYLabel(:, 3)));
 
     heatmapYLabelStr=repelem({''},length(heatmapYLabel));
 
@@ -189,6 +228,7 @@ function gExHPlot(gExResults, specs)
 
 
 
+    %%%%  heatmap
 
     f=figure('visible','off');
     f.Position(3:4)=2*f.Position(3:4);
@@ -204,21 +244,46 @@ function gExHPlot(gExResults, specs)
     Ax = gca;
     Ax.XDisplayLabels = nan(length(Ax.XDisplayData),1);
     Ax.YDisplayLabels = nan(length(Ax.YDisplayData),1);
+    % set(gca,'ColorScaling','log') % Log scale
+    % axs = struct(gca);
+    % cb = axs.Colorbar;
+    %
+    % cb.Ticks = unique(floor(linspace(min(heatMapVal(:)), max(heatMapVal(:)), 8))) ;
+    %
+    %
+    % Ax.XDisplayLabels=geneAnnotes;
+
+    % set(struct(h).NodeChildren(3), 'XTickLabelRotation', 0); % put instead of the last example line
     Ax.YDisplayLabels=heatmapYLabel;
 
     colorbar
     title('log pvalue');
     figName=strcat(outputFolderName, 'allHeatmap.jpg');
     saveas(gcf, figName)
-    close(gcf);
+    %closegcf);
 
     
+
+
+    %%%%%%%%%%%%%%%%%%
+
+
+    % heatmap for selected ones
 
 
     geneFlags=any(heatMapVal>pvalAllHMapMin & abs(heatMapValMD)>dMedAllHMapMin);
     postFalgs=any(heatMapVal>pvalAllHMapMin  & abs(heatMapValMD)>dMedAllHMapMin, 2);
 
 
+
+
+
+
+    % 
+    % motifNum=addressAll0(:, 1);
+    % numSigs=accumarray(motifNum, postFalgs);
+    % postFalgs=numSigs>0;
+    % postFalgs=postFalgs(motifNum);
     addressAllSel=addressAll0(postFalgs, :);
     heatMapValSel=heatMapVal(postFalgs, :);
     heatMapValMDSel=heatMapValMD(postFalgs, :);
@@ -228,7 +293,28 @@ function gExHPlot(gExResults, specs)
 
     geneAnnotesSell=geneAnnotes(geneFlags);
     heatmapYLabelSel=heatmapYLabel(postFalgs,:);
+    % f=figure('visible','off');
+    % f.Position(3:4)=2*f.Position(3:4);
+    % 
+    % h=heatmap(heatMapValSel,'FontSize',12,'Colormap',cool,'CellLabelColor','none');
+    % c=gray;
+    % c = flipud(c);
+    % colormap(c);
+    % % hHeatmap = struct(h).Heatmap;
+    % % hHeatmap.GridLineStyle = ':';
+    % 
+    % Ax = gca;
+    % Ax.XDisplayLabels=geneAnnotesSell;
+    % Ax.YDisplayLabels=heatmapYLabelSel;
+    % set(gca,'ColorScaling','log')
+    % axs = struct(gca);
+    % cb = axs.Colorbar;
+    %
+    % cb.Ticks = unique(floor(linspace(min(heatMapVal(:)), max(heatMapVal(:)), 8))) ;
 
+
+    % figName=strcat(outputFolderName, 'selectedHeatmap.jpg');
+    % saveas(gcf, figName)
 
     % heatmap for selected ones, ordered with type
 
@@ -248,7 +334,8 @@ function gExHPlot(gExResults, specs)
         heatMapValMDSel=heatMapValMDSel(iAddrSort, :);
 
         [geneAnnotesSell, idGSort]=sort(geneAnnotesSell);
-
+        % [~, idGSort]=sortrows(heatMapValSel.');
+        % geneAnnotesSell=geneAnnotesSell(idGSort);
 
         heatMapValSel=heatMapValSel(:, idGSort);
         heatMapValMDSel=heatMapValMDSel(:, idGSort);
@@ -256,11 +343,10 @@ function gExHPlot(gExResults, specs)
     else
         heatmapYLabel=heatmapYLabelSel;
     end
-    
 
 
 
-    f=figure('visible','off');
+    f=figure('visible','on');
     f.Position(3:4)=2*f.Position(3:4);
     f.Position(1:2)=1/2*f.Position(1:2);
     % h=heatmap(heatMapValSel,'FontSize',6,'Colormap',cool,'CellLabelColor','white', 'CellLabelFormat', '%.0f');
@@ -269,46 +355,91 @@ function gExHPlot(gExResults, specs)
     c=gray;
     c = flipud(c);
     colormap(c);
-
+    if ~isempty(heatMapValSel)
+        clim([0,min(50, max(heatMapValSel(:)))])
+    end
+    % hHeatmap = struct(h).Heatmap;
+    % hHeatmap.GridLineStyle = ':';
 
     Ax = gca;
     Ax.XDisplayLabels=geneAnnotesSell;
     Ax.YDisplayLabels=heatmapYLabel;
-
+    % set(gca,'ColorScaling','log')
+    % axs = struct(gca);
+    % cb = axs.Colorbar;
+    %
+    % cb.Ticks = unique(floor(linspace(min(heatMapVal(:)), max(heatMapVal(:)), 8)));
     title('log pvalue');
 
     figName=strcat(outputFolderName, 'selectedSortedHeatmap.jpg');
     saveas(gcf, figName)
-    close(gcf);
+    %closegcf);
 
-    if ~isempty(heatMapValSel)
     cgo_all = clustergram(heatMapValSel.*sign(heatMapValMDSel),'Standardize','none', 'linkage', 'complete','RowPDist', 'correlation','ColumnPDist', 'correlation' );
     heatmapYLabelCell=arrayfun(@(i) {heatmapYLabel(i, :)}, (1:size(heatmapYLabel, 1)));
-
+    % set(cgo_all,'RowLabels',heatmapYLabelCell,'ColumnLabels',geneAnnotesSell)
+    sortColumn=cgo_all.ColumnLabels;
+    sortColumn=sortColumn.';
+    sortColumn=cell2mat(sortColumn);
+    sortColumn=str2num(sortColumn);
 
     set(cgo_all,'RowLabels',heatmapYLabelCell,'ColumnLabels',geneAnnotesSell, 'Colormap', redbluecmap)
     f=figure('visible','off');
+    % f.Position(3:4)=3*f.Position(3:4);
+    % f.Position(1:2)=1/3*f.Position(1:2);
 
     plot(cgo_all, f)
 
     figName=strcat(outputFolderName, 'selectedClutergram.jpg');
     saveas(gcf, figName)
-    close(gcf);
+
+
+
+    % f=figure('visible','on');
+    % f.Position(3:4)=2*f.Position(3:4);
+    % f.Position(1:2)=1/2*f.Position(1:2);
+    % 
+    % % f.Position(3:4)=2*f.Position(3:4);
+    % 
+    % h=heatmap(heatMapValSel(:, sortColumn),'FontSize',6,'Colormap',cool,'CellLabelColor','none');
+    % 
+    % c=gray;
+    % c = flipud(c);
+    % colormap(c);
+    % clim([0,min(400, max(heatMapValSel(:)))])
+    % 
+    % Ax = gca;
+    % Ax.XDisplayLabels=geneAnnotesSell(sortColumn);
+    % Ax.YDisplayLabels=heatmapYLabel;
+    % 
+    % 
+    % title('log pvalue');
+    % 
+    % figName=strcat(outputFolderName, 'selectedPvalClHeatmap.jpg');
+    % saveas(gcf, figName)
+
+
+
+    f=figure('visible','on');
+    % f.Position(3:4)=3*f.Position(3:4);
+    f.Position(3:4)=2*f.Position(3:4);
+    f.Position(1:2)=1/2*f.Position(1:2);
+
+    h=heatmap(heatMapValMDSel,'FontSize',6,'Colormap',cool,'CellLabelColor','white', 'CellLabelFormat', '%1.1f');
+    c=colormap(lbmap(256,'BrownBlue'));
+    colormap(c);
+    cMax=max(abs(heatMapValMDSel(:)));
+
+    cMax=min([cMax, 15]);
+
+    if ~isempty(heatMapValSel)
+        clim([-cMax,cMax])
     end
 
 
-
-
-
-
-    f=figure('visible','off');
-    f.Position(3:4)=3*f.Position(3:4);
-    % f.Position(3:4)=2*f.Position(3:4);
-
-    h=heatmap(heatMapValMDSel,'FontSize',6,'Colormap',cool,'CellLabelColor','white', 'CellLabelFormat', '%1.1f');
-    c=turbo;
-    colormap(c);
-
+    
+    % hHeatmap = struct(h).Heatmap;
+    % hHeatmap.GridLineStyle = ':';
 
     Ax = gca;
     Ax.XDisplayLabels=geneAnnotesSell;
@@ -318,8 +449,7 @@ function gExHPlot(gExResults, specs)
 
     figName=strcat(outputFolderName, 'selectedDMedianHeatmap.jpg');
     saveas(gcf, figName)
-    close(f);
-
+    %closegcf);
 
 
 

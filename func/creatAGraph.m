@@ -3,7 +3,22 @@ function [G,gStruct, cidOut, cellTypeVecU, haveZ, SIDIdxS, TOut]=creatAGraph(fil
 
 T = readtable(filename);
 
+T.Centroid_Y=max(T.Centroid_Y(:))-T.Centroid_Y;
 
+if options.iSelROI
+
+    T=T(T.Centroid_X>options.xyLTh(1), :);
+    T=T(T.Centroid_Y>options.xyLTh(2), :);
+    T=T(T.Centroid_X<options.xyHTh(1), :);
+    T=T(T.Centroid_Y<options.xyHTh(2), :);
+    
+end
+
+if options.isDiscardCellType
+    T=T(~matches(T.(options.cellTypeName), options.discardCellType), :);
+end
+
+% T.SID=double(T.SID>0);
 
 varNames=T.Properties.VariableNames;
 
@@ -98,20 +113,26 @@ for iAID=1:length(AIDIdx)
 
 
         xcoords=T2.Centroid_X; 
-        xcoords=xcoords-min(xcoords);
         ycoords=T2.Centroid_Y;
-        ycoords=ycoords-min(ycoords);
+        if options.isTileSIDs
+            xcoords=xcoords-min(xcoords);
+            ycoords=ycoords-min(ycoords);
+        end
+        
+        
 
         if haveZ
             zcoords=T2.Centroid_Z;
-            zcoords=zcoords-mean(zcoords);
+            if options.isTileSIDs
+                zcoords=zcoords-mean(zcoords);
+            end
 
         end
 
 
 
 
-        cellTypeVec=T2.cellType;
+        cellTypeVec=T2.(options.cellTypeName);
 
         % cellSectionVec=ones(length(cellTypeVec),1);
 
@@ -195,18 +216,23 @@ for iAID=1:length(AIDIdx)
         edges=sort(edges, 2);
         [edgesUnique,~,~]=unique(edges, 'rows', 'stable');
 
-        edgeDist02=xyzcoords(edgesUnique(:,2), :)-xyzcoords(edgesUnique(:,1), :);
-        edgeDist02=edgeDist02.^2;
-        edgeDist02=sum(edgeDist02,2);
-        Weigths=exp(-edgeDist02/mean(sqrt(edgeDist02))^2);     
+        if ~strcmpi(options.gMode,"epsilon")
 
-        weightThreshold=1e-10;
-        edgeDistSum=edgeDistSum+[sum(sqrt(edgeDist02(Weigths>weightThreshold))), sum(Weigths>weightThreshold)];
-        edgesUnique=edgesUnique(Weigths>weightThreshold, :);
+            edgeDist02=xyzcoords(edgesUnique(:,2), :)-xyzcoords(edgesUnique(:,1), :);
+            edgeDist02=edgeDist02.^2;
+            edgeDist02=sum(edgeDist02,2);
+            Weigths=exp(-edgeDist02/mean(sqrt(edgeDist02))^2);     
+    
+            weightThreshold=1e-6;
+            edgeDistSum=edgeDistSum+[sum(sqrt(edgeDist02(Weigths>weightThreshold))), sum(Weigths>weightThreshold)];
+            edgesUnique=edgesUnique(Weigths>weightThreshold, :);
+        end
         edgesUniqueTotal{iABID}=edgesUnique+numcellsTotal;
         numcellsTotal=numcellsTotal+numcells;
         TCib{iBID}=T2.CIDNm;
-        xshift=1.1*max(abs(coordsTotal{iABID}(:, 1)));
+        if options.isTileSIDs
+            xshift=1.1*max(abs(coordsTotal{iABID}(:, 1)));
+        end
         % figure
         % 
         % scatter(coordsTotal{iABID}(:, 1),coordsTotal{iABID}(:, 2))
@@ -214,8 +240,11 @@ for iAID=1:length(AIDIdx)
 
 
     end
-    coordSoFar=vertcat(coordsTotal{:});
-    yshift=max(abs(coordSoFar(:, 2)));
+    
+    if options.isTileSIDs
+        coordSoFar=vertcat(coordsTotal{:});
+        yshift=max(abs(coordSoFar(:, 2)));
+    end
 
     TCia{iAID} = vertcat(TCib{:});
     nearNeighsia{iAID}=vertcat(nearNeighsib{:});
@@ -262,6 +291,12 @@ if ~isempty(nearNeighs)
     G.Nodes.nearNeighs=nearNeighs;
 end
 TOut=T(cidOut, :);
+
+TOut.Centroid_X=coordsTotal(:, 1);
+TOut.Centroid_Y=coordsTotal(:, 2);
+if haveZ
+   TOut.Centroid_Z=coordsTotal(:, 3);
+end
 
 gStruct=getTransitionStruct(G);
 

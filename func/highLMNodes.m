@@ -11,7 +11,7 @@ if config.is3D
     zcoordsTotal=G.Nodes.Coordinates(:, 3);
 end
 
-numExtMotifs=length(ppHMNodesCell);
+numExtMotifs=min(length(ppHMNodesCell), 30);
 W=config.W;
 
 for iMG=1:numExtMotifs
