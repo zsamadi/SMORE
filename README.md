@@ -8,8 +8,8 @@ A sample input data table with 4 fields,
 2. cellType: Cell type or cluster ID, this sample dataset has 12 cell types.
 3. Centroid_X, Centroid_Y: Spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
 
-A sample input gene expression table with 3 fields, 
-1. gene_i: The expression for genes. gene names are arbitrary. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
+A sample input gene expression table with fields, 
+1. gene_i: The expression for genes. We use expression values as they are and don't normalize or quality control them. 
    
 [notebook](https://github.com/zsamadi/SMORE/tree/main/notebook)
 
