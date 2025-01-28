@@ -13,7 +13,10 @@ A sample input gene expression table with 3 fields,
    
 [notebook](https://github.com/zsamadi/SMORE/tree/main/notebook)
 
-This folder contains an example notebook running the algorithm on the on the preoptic area of mouse hypothalamus dataset obtained from [here](https://www.science.org/doi/10.1126/science.aau5324). Output results and related figures will be saved in the "output" folder by default. The  settings for the algorithm along with their description and default values are provided in the following table. 
+This folder contains an example notebook running the algorithm on the on the preoptic area of mouse hypothalamus dataset obtained from [here](https://www.science.org/doi/10.1126/science.aau5324). Output results and related figures will be saved in the "output" folder by default. 
+
+You can either use this notebook with [matlab kernel support](https://github.com/mathworks/jupyter-matlab-proxy?tab=readme-ov-file#run-matlab-code-in-a-jupyter-notebook), or copy the code insdie some matlab script and run it on your own dataset. The  settings for the algorithm along with their description and default values are provided in the following table. Further explanations are provided inside the notebook.
+
 Options |Description | Default 
 --- | --- | --- 
 __Input\Output__
@@ -49,8 +52,6 @@ isGEByTissue | perform gene expression for each SID separately (options: true, f
 gePvalMin  | Minimum pvalue for selected heatmap plots of gene expression  | 0.05
 geRandTest  |Rand test for gene expression analysis, useful for finding threshold for significant cases (options: true, false)  | false
 
-
-You can either use this notebook with [matlab kernel support] (https://github.com/mathworks/jupyter-matlab-proxy?tab=readme-ov-file#run-matlab-code-in-a-jupyter-notebook), or copy the code insdie some matlab script and run it on your own dataset.  
 
 
 [func](https://github.com/zsamadi/SMORE/tree/main/func)
