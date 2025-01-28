@@ -11,9 +11,9 @@ A sample input data table with 4 fields,
 A sample input gene expression table with 3 fields, 
 1. gene_i: The expression for genes. gene names are arbitrary. This sample dataset has expression for three genes, gene_1, gene_2 and gene_3.
    
-[run](https://github.com/zsamadi/SMORE/tree/main/run)
+[notebook](https://github.com/zsamadi/SMORE/tree/main/notebook)
 
-This folder contains main execution function for the algorithm. Going into this folder and entering smore without any option in the MATLAB command window will run the algorithm with default settings. The default input data is "sampleDataEb.csv" in "data" folder that contains a random network with motif (A/B)CDE embedded in it. Output results and related figures will be saved in the "output" folder by default. The  settings for the algorithm along with their description and default values are provided in the following table. 
+This folder contains an example notebook running the algorithm on the on the preoptic area of mouse hypothalamus dataset obtained from [here](https://www.science.org/doi/10.1126/science.aau5324). Output results and related figures will be saved in the "output" folder by default. The  settings for the algorithm along with their description and default values are provided in the following table. 
 Options |Description | Default 
 --- | --- | --- 
 __Input\Output__
@@ -50,13 +50,7 @@ gePvalMin  | Minimum pvalue for selected heatmap plots of gene expression  | 0.0
 geRandTest  |Rand test for gene expression analysis, useful for finding threshold for significant cases (options: true, false)  | false
 
 
-You can use the following command to modify all possible smore options: 
-
-```
-smore(input='sampleDataEb.csv', gexFilename='sampleDataEb.csv',gAnotFilename='', output='output', WMotif=4, nMotifs=5, fixedTypes=0, nTrain=10, nScore=10, ...
-   shuffleMode='shuffle', samplingFreq=1.0, gMode='delaunay', nNeighs=5, rEps=0, neighDepth=4, isEnrich=true, ...
-   diffMotif=false, nEval=25, nRefine=4, nRefineIter=20, doGEA=true, iSPGEx=false, isGEByTissue=false,gePvalMin=0.05, geRandTest=false)
-```
+You can either use this notebook with [matlab kernel support] (https://github.com/mathworks/jupyter-matlab-proxy?tab=readme-ov-file#run-matlab-code-in-a-jupyter-notebook), or copy the code insdie some matlab script and run it on your own dataset.  
 
 
 [func](https://github.com/zsamadi/SMORE/tree/main/func)
@@ -65,7 +59,7 @@ Contains related functions for running smore. This folder should be at the same 
 
 [output](https://github.com/zsamadi/SMORE/tree/main/output)
 
-Default folder for saving the output results. The folder currently contains output results of running the algorithm on the default input of "sampleDataEb.csv" file. 
+Default folder for saving the output results. 
 
 * __GraphWithTypes__ and __GraphWithShuffleTypes__:  The tissue map highlighted with the original cell types and shuffled cell types, respectively. 
 
