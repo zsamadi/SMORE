@@ -25,7 +25,7 @@
     options.doGEA=true; % perform differential gene expression analysis 
     options.iSPGEx=false; % if input gene expression data is csr sparse formatted, otherwise it's csv. 
     options.gePvalMin=1e-3; % minimum pvalue fot differential gene expression analysis
-    options.isGEByTissue=true; % compare gene expression within each tissue section separately, set true if there is heterogeneity among tissues to prevent false positives. 
+    options.isGEByTissue=false; % compare gene expression within each tissue section separately, set true if there is heterogeneity among tissues to prevent false positives. 
     options.isHGenEx=true;
     % more advanced and test settings
     options.nEval=25;
