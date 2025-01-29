@@ -1,5 +1,5 @@
-# SMORE
-Spatial Motif Recognition
+# <span style="color:orange">SMORE: Spatial Motif Recognition</span>
+
 
 [data](https://github.com/zsamadi/SMORE/tree/main/data)
 
