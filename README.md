@@ -15,7 +15,7 @@ A sample input gene expression table with fields,
 
 This folder contains an example notebook running the algorithm on the on the preoptic area of mouse hypothalamus dataset obtained from [here](https://www.science.org/doi/10.1126/science.aau5324). Output results and related figures will be saved in the "output" folder by default. 
 
-You can either use this notebook with [matlab kernel support](https://github.com/mathworks/jupyter-matlab-proxy?tab=readme-ov-file#run-matlab-code-in-a-jupyter-notebook), or copy the code insdie some matlab script and run it on your own dataset. The  settings for the algorithm along with their description and default values are provided in the following table. Further explanations are provided inside the notebook.
+You can either use this notebook with [matlab kernel support](https://github.com/mathworks/jupyter-matlab-proxy?tab=readme-ov-file#run-matlab-code-in-a-jupyter-notebook), or use the provided smoreNotebookGit.m matlab script and run it on your own dataset. The  settings for the algorithm along with their description and default values are provided in the following table. Further explanations are provided inside the notebook.
 
 Options |Description | Default 
 --- | --- | --- 
