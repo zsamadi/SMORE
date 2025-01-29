@@ -3,9 +3,10 @@
 
 [data](https://github.com/zsamadi/SMORE/tree/main/data)
 
-A sample input data table with 4 fields, 
-1. SID: Section or TIssue ID, which is the animal ID or section ID in case of the cells being from multiples different tissues. This sample dataset has two IDs.
-2. cellType: Cell type or cluster ID, this sample dataset has 12 cell types.
+Two sample input data tablesare provided in the hypo2D folder and the synthetic folder. 
+0. Cell_ID
+1. SID: Section or TIssue ID, which is the animal ID or section ID in case of the cells being from multiples different tissues.
+2. cellType: Cell type or cluster ID.
 3. Centroid_X, Centroid_Y: Spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
 
 A sample input gene expression table with fields, 
@@ -13,9 +14,9 @@ A sample input gene expression table with fields,
    
 [notebook](https://github.com/zsamadi/SMORE/tree/main/notebook)
 
-This folder contains an example notebook running the algorithm on the on the preoptic area of mouse hypothalamus dataset obtained from [here](https://www.science.org/doi/10.1126/science.aau5324). Output results and related figures will be saved in the "output" folder by default. 
+This folder contains an example notebook running the algorithm on the on the preoptic area of mouse hypothalamus dataset obtained from [here](https://www.science.org/doi/10.1126/science.aau5324) and provided in the hypo2D folder of the data section. Output results and related figures will be saved in the "output" folder by default. 
 
-You can either use this notebook with [matlab kernel support](https://github.com/mathworks/jupyter-matlab-proxy?tab=readme-ov-file#run-matlab-code-in-a-jupyter-notebook), or use the provided smoreNotebookGit.m matlab script and run it on your own dataset. The  settings for the algorithm along with their description and default values are provided in the following table. Further explanations are provided inside the notebook.
+You can either use this notebook with [matlab kernel support](https://github.com/mathworks/jupyter-matlab-proxy?tab=readme-ov-file#run-matlab-code-in-a-jupyter-notebook), or use the provided smoreNotebook.m matlab script and run it on your own dataset. The  settings for the algorithm along with their description and default values are provided in the following table. Further explanations are provided inside the notebook.
 
 Options |Description | Default 
 --- | --- | --- 
@@ -56,7 +57,7 @@ geRandTest  |Rand test for gene expression analysis, useful for finding threshol
 
 [func](https://github.com/zsamadi/SMORE/tree/main/func)
 
-Contains related functions for running smore. This folder should be at the same folder as run folder or its path should be added to the MATLAB path. 
+Contains related functions for running smore. This folder should be at the same folder as notebook folder or its path should be added to the MATLAB path. 
 
 [output](https://github.com/zsamadi/SMORE/tree/main/output)
 
