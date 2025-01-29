@@ -4,10 +4,10 @@
 [data](https://github.com/zsamadi/SMORE/tree/main/data)
 
 Two sample input data tablesare provided in the hypo2D folder and the synthetic folder. 
-0. Cell_ID
-1. SID: Section or TIssue ID, which is the animal ID or section ID in case of the cells being from multiples different tissues.
-2. cellType: Cell type or cluster ID.
-3. Centroid_X, Centroid_Y: Spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
+1. Cell_ID
+2. SID: Section or TIssue ID, which is the animal ID or section ID in case of the cells being from multiples different tissues.
+3. cellType: Cell type or cluster ID.
+4. Centroid_X, Centroid_Y: Spatial coordinates of the cells. Add Centroid_Z if third dimension is available as well.
 
 A sample input gene expression table with fields, 
 1. gene_i: The expression for genes. We use expression values as they are and don't normalize or quality control them. 
