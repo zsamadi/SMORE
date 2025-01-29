@@ -10,7 +10,7 @@ function pLRCDF=getLRCDF(geneExDSi,meDeltaMoti,nuMotifCell ,pvalMin)
 
         pLRCDF=probiRightPositive+probiLeftNegative;
 
-
-
-    pLRCDF=max(pLRCDF, exp(-700));
+		if pLRCDF<exp(-700) %  to prevent some rare special cases
+		   pLRCDF=0.5;
+		end
     
