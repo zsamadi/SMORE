@@ -21,7 +21,7 @@
     options.neighDepth=4; % used in the case of kernel method for generating the control data
     options.nTrain=10; % number of train replicates, higher precision with higher numbers
     options.nScore=2; % number of repeats for hold-out scoring, only affects the order of output motifs not their structure
-    options.isEnrich=false; % perform enrichment, takes more time if enabled. 
+    options.isEnrich=true; % perform enrichment, takes more time if enabled. 
     options.doGEA=true; % perform differential gene expression analysis 
     options.iSPGEx=false; % if input gene expression data is csr sparse formatted, otherwise it's csv. 
     options.gePvalMin=1e-3; % minimum pvalue fot differential gene expression analysis
