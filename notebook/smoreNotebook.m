@@ -1,6 +1,4 @@
-%% SMORE analysis of PTB21.1 dataset
-% 
-% 
+
 % The settings required for running Smore 
 
 
@@ -21,11 +19,11 @@
     options.neighDepth=4; % used in the case of kernel method for generating the control data
     options.nTrain=10; % number of train replicates, higher precision with higher numbers
     options.nScore=2; % number of repeats for hold-out scoring, only affects the order of output motifs not their structure
-    options.isEnrich=true; % perform enrichment, takes more time if enabled. 
+    options.isEnrich=false; % perform enrichment, takes more time if enabled. 
     options.doGEA=true; % perform differential gene expression analysis 
     options.iSPGEx=false; % if input gene expression data is csr sparse formatted, otherwise it's csv. 
     options.gePvalMin=1e-3; % minimum pvalue fot differential gene expression analysis
-    options.isGEByTissue=false; % compare gene expression within each tissue section separately, set true if there is heterogeneity among tissues to prevent false positives. 
+    options.isGEByTissue=true; % compare gene expression within each tissue section separately, set true if there is heterogeneity among tissues to prevent false positives. 
     options.isHGenEx=true;
     % more advanced and test settings
     options.nEval=25;
@@ -534,11 +532,18 @@ end
 % the highlighted results are saved in output/gOntissue/[gene name] folder 
 if options.isHGenEx
 
+    if  cgOptions.iSelROI
+        ylimv=[cgOptions.xyLTh(2)-1000, cgOptions.xyHTh(2)+1000];
+        xlimv=[cgOptions.xyLTh(1)-1000, cgOptions.xyHTh(1)+1000];
+    else
+        ylimv=[cgOptions.xyLTh(2)-2000, cgOptions.xyHTh(2)+5000];
+        xlimv=[cgOptions.xyLTh(1)-6000, cgOptions.xyHTh(1)+5000];
+    end
+
+
+
 
     gnS3=readtable(strcat(geaSpecs.outputFolderName, 'geaTable.csv'));
-    gnS3=gnS3(abs(gnS3.deltaMedian)>geaSpecs.dMedHMapMin, :); 
-    casePlotID=(1:5);
-
     markerSize=30;
 
     gOntissueFoldero=strcat(outputFolderName, 'gOntissue/');
@@ -569,7 +574,6 @@ if options.isHGenEx
         zcoordsTotal=G.Nodes.Coordinates(:, 3);
     end
     for igh=1:min(2*size(gnS3, 1), size(gnS3, 1))
-        isVisible= any(igh==casePlotID);
         casei=gnS3(igh, :);
         mtni=casei.motifNumber;
         mtci=casei.cellType;
@@ -590,11 +594,7 @@ if options.isHGenEx
             end
 
 
-            if isVisible
-                  f=figure('visible','on');
-            else
-                 f=figure('visible','off');
-            end
+            f=figure('visible','on');
 
             f.Position(3:4)=2*f.Position(3:4);
             f.Position(1:2)=1/2*f.Position(1:2);
@@ -656,19 +656,19 @@ if options.isHGenEx
             colorbar
             clim([0,1]);
 
-            titleStr=sprintf('%s expression in MPCT:%d:%d:%d:%d, (median(type), median(motif), delta)=(%2.2f,%2.2f, %2.2f)',...
-                geNames{gni},mtni,mtpi, mtci,mtsci,casei.typeMedian,casei.motifMedian, casei.deltaMedian);
+            titleStr=sprintf('%s expression in TMCP:%d:%d:%d:%d, (median(type), median(motif), delta)=(%2.2f,%2.2f, %2.2f)',...
+                geNames{gni},mtsci,mtni, mtci,mtpi,casei.typeMedian,casei.motifMedian, casei.deltaMedian);
             title(tcl,titleStr)
-            motifAdd=sprintf( '%s_MPCT_%d_%d_%d_%d',geNames{gni},mtsci,mtni, mtci,mtpi);
+
+            motifAdd=sprintf( '%s_TMCP_%d_%d_%d_%d',geNames{gni},mtsci,mtni, mtci,mtpi);
+
             figname=strcat(gOntissueFolder,motifAdd, '.jpeg');
             % axis off
             % axis equal
 
 
             saveas(gcf,figname)
-             if ~isVisible
-                close(gcf);
-            end
+            close(gcf);
         end
     end
 
