@@ -1,5 +1,5 @@
-# SMORE
-Spatial Motif Recognition
+# <span style="color:orange">SMORE: Spatial Motif Recognition</span>
+
 
 [data](https://github.com/zsamadi/SMORE/tree/main/data)
 
@@ -96,13 +96,7 @@ Please send questions or possible issues with running the code on your data to Z
 ## Citing
 Detailed description for the algorithm is provided in:
 
-
-Samadi Z., Askary A.,
-"Spatial motifs reveal patterns in cellular architecture of complex tissues", 
-BioRxiv, April. 2024. [[full text]](https://www.biorxiv.org/content/10.1101/2024.04.08.588586v1)
-
-
-
+Samadi, Zainalabedin, Kai Hao, and Amjad Askary. "SMORE: spatial motifs reveal patterns in cellular architecture of complex tissues." Genome Biology 26.1 (2025): 3.[[full text]](https://doi.org/10.1186/s13059-024-03467-5)
 
 
 
