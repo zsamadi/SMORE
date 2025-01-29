@@ -96,7 +96,7 @@ Please send questions or possible issues with running the code on your data to Z
 ## Citing
 Detailed description for the algorithm is provided in:
 
-Samadi, Z., Hao, K. & Askary, A. "SMORE: spatial motifs reveal patterns in cellular architecture of complex tissues". Genome Biol 26, 3 (2025).[[full text]](https://doi.org/10.1186/s13059-024-03467-5)
+Samadi, Z., Hao, K. \& Askary, A. "SMORE: spatial motifs reveal patterns in cellular architecture of complex tissues". Genome Biol 26, 3 (2025).[[full text]](https://doi.org/10.1186/s13059-024-03467-5)
 
 
 
