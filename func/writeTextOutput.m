@@ -27,10 +27,10 @@ fprintf(fileID,starLine);
 fprintf(fileID,'REFERENCE\n');
 fprintf(fileID,starLine);
 
-fprintf(fileID,'Samadi Z., Askary A.,\n');
-fprintf(fileID,'Spatial motifs reveal patterns in cellular architecture of complex tissues,\n');
+fprintf(fileID,'Samadi, Z., Hao, K. & Askary, A.,\n');
+fprintf(fileID,'SMORE: spatial motifs reveal patterns in cellular architecture of complex tissues.\n');
 
-fprintf(fileID,'BioRxiv, Mar. 7, 2024.\n');
+fprintf(fileID,'Genome Biol 26, 3 (2025).\n');
 fprintf(fileID,starLine);
 fprintf(fileID,'\n');
 
