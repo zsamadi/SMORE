@@ -91,7 +91,7 @@ Default folder for saving the output results.
 
 * __selectedDMedianHeatmap__: Heatmap of delta median values for the selected cases. 
 ## Mex files
-Use mexw64 files for windows operating system and mexmaca64 files for Mac. 
+Use mexw64 files for Windows operating system and mexmaca64 files for Mac. 
 ## Questions
 Please send questions or possible issues with running the code on your data to Zain Samadi (zainsamadi at ucla.edu). 
 
